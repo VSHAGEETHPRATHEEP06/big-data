@@ -1,0 +1,39 @@
+\section{Conclusion}
+FleetPulse shows that a Lambda architecture fits a ride-hailing fleet that has both a live GPS stream and a
+daily cost file. The speed layer gives utilisation, fares and idle alerts within seconds. The batch layer
+recomputes each day exactly, joins it with the partner costs and finds vehicles that are becoming
+unprofitable, with clear reasons. Shared Spark code, a parity test and reconciliation between the layers keep
+the two paths in step. Logs, metrics, alerts and lineage tables make every stage observable, and one Docker
+Compose command starts the whole system on a laptop.
+
+\section{Individual contributions}
+All three members took part in the design discussions, the testing and the writing of this report. The main
+responsibilities were shared as shown in Table~\ref{tab:contrib}.
+
+\begin{table}[H]
+\centering\small
+\caption{Individual contributions.}
+\label{tab:contrib}
+\begin{tabularx}{\textwidth}{@{}p{5.2cm} L@{}}
+\toprule
+\textbf{Member} & \textbf{Main work} \\
+\midrule
+Arivanan V. (EG/2021/4414) & Data simulators (fleet model, streaming source and daily-batch source) and Kafka ingestion (topics, partitions, producer settings) \\
+Shageethpratheep V. (EG/2021/4809) & Spark speed layer and batch layer, shared transformation module, Lambda architecture decision \\
+Shayanthavi T. (EG/2021/4811) & Airflow orchestration, PostgreSQL design, FastAPI serving layer, Grafana dashboards and observability \\
+All three members & Testing, demo, and this report \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{thebibliography}{9}
+\small
+\bibitem{marz2015} N. Marz and J. Warren, \emph{Big Data: Principles and Best Practices of Scalable Real-Time
+Data Systems}. Manning Publications, 2015.
+\bibitem{kreps2014} J. Kreps, ``Questioning the Lambda Architecture,'' O'Reilly Radar, July 2014.
+\bibitem{kleppmann2017} M. Kleppmann, \emph{Designing Data-Intensive Applications}. O'Reilly Media, 2017.
+\bibitem{spark} Apache Software Foundation, ``Structured Streaming Programming Guide,'' Apache Spark 4.1
+documentation, 2026.
+\bibitem{kafka} Apache Software Foundation, ``Apache Kafka Documentation,'' version 4.3, 2026.
+\bibitem{airflow} Apache Software Foundation, ``Apache Airflow Documentation,'' version 3.3, 2026.
+\end{thebibliography}

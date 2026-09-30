@@ -1,0 +1,86 @@
+\section{Observability design}
+A pipeline that only works is not enough. We must see when it stops working, and why. Our design follows
+three questions: \emph{is data flowing?}, \emph{is it correct?} and \emph{is it on time?} Every stage answers
+them with logs, metrics and alerts.
+
+\subsection{Structured logging}
+Every Python component (simulators, both Spark jobs, Airflow tasks and the API) writes one JSON object per
+line to standard output with the same core keys: \code{ts}, \code{level}, \code{service}, \code{stage}
+(ingestion, processing, storage, serving or orchestration) and \code{event}. Extra keys give context, such as
+the micro-batch id, the Airflow run id or the simulated date. Spark's own Java logs use Spark's JSON layout,
+and the Kafka client logs pass through the same JSON formatter. Because all stages use the same keys, one
+\code{jq} filter can follow a problem through the whole pipeline. This is a real line from the speed layer:
+
+\noindent\begin{minipage}{\linewidth}
+\begin{Verbatim}[fontsize=\scriptsize,frame=single,framesep=2mm,rulecolor=\color{black!30}]
+{"ts": "2026-09-30T08:39:41.660+00:00", "level": "INFO", "service": "spark-speed-layer",
+ "stage": "processing", "event": "vehicle_state_batch", "batch_id": 173, "rows": 100,
+ "valid": 99, "dead_letters": 1, "vehicles_updated": 20, "idle_alerts_opened": 0,
+ "idle_alerts_resolved": 0, "stream_time": "2026-09-02 18:11:36", "e2e_latency_s": 2.05,
+ "duration_ms": 1398}
+\end{Verbatim}
+\end{minipage}
+
+\subsection{Metrics}
+Prometheus scrapes every stage every 10 seconds. Table~\ref{tab:metrics} lists the most useful metrics.
+
+\begin{table}[!htb]
+\centering\small
+\caption{Main metrics, grouped by pipeline stage.}
+\label{tab:metrics}
+\begin{tabularx}{\textwidth}{@{}P{2.2cm} P{5.4cm} L@{}}
+\toprule
+\textbf{Stage} & \textbf{Metric} & \textbf{Why we measure it} \\
+\midrule
+Ingestion & events sent per partition, send errors, delivery latency, time of the last cost file & Is data reaching Kafka? Did the partner file arrive? \\
+Processing & input rows per second, micro-batch duration, state rows (from a Spark query listener) & Is Spark keeping up with its trigger? \\
+Processing & offsets behind the latest offset (lag), rows dropped by the watermark & Is the speed layer falling behind or losing late data? \\
+Storage & end-to-end latency from Kafka to PostgreSQL, rows written, replayed batches & Are the tables fresh, and are writes exactly once? \\
+Orchestration & Airflow task results and scheduler heartbeat (StatsD), batch days behind & Is the batch layer running every day? \\
+Serving & API request rate and latency, vehicles by status, idle minutes, loss-making vehicles & Is serving healthy, and what is the business state? \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Tracing and lineage}
+Full distributed tracing (for example with Jaeger) needs more memory than our laptop has, so we built
+light-weight tracing and lineage from ids that already exist. Every event has an \code{event\_id}, which is
+also sent as the Kafka header \code{trace\_id}. The master dataset stores the Kafka topic, partition, offset
+and append time of every event, so any number in a report can be traced back to the exact Kafka records.
+\code{ops.speed\_batches} records every committed micro-batch, \code{ops.batch\_files} every partner file
+with its checksum, and \code{ops.pipeline\_runs} every Airflow step with its inputs, outputs and timing.
+Each batch view row also carries the Airflow run id that produced it.
+
+\subsection{Alerts and health checks}
+\label{sec:alerts}
+Prometheus evaluates 14 rules. Alertmanager groups the alerts and sends them to a webhook in our API, which
+writes them as JSON logs and stores them in \code{ops.alert\_notifications}. Airflow task failures are
+stored in the same table by a failure callback, so there is one place to see all problems.
+Table~\ref{tab:alerts} shows the main rules. Some alerts are hidden when their cause is already known. For
+example, if the Spark container is down, the alert ``speed layer stale'' is not sent again.
+
+\begin{table}[!htb]
+\centering\small
+\caption{Main alert rules (real seconds, simulated time in brackets).}
+\label{tab:alerts}
+\begin{tabularx}{\textwidth}{@{}P{4.7cm} L P{1.5cm}@{}}
+\toprule
+\textbf{Alert} & \textbf{Condition} & \textbf{Severity} \\
+\midrule
+NoTelemetryIngested & no event reached Kafka for 1 minute (2 hours) & critical \\
+SpeedLayerStale & the speed layer wrote nothing for more than 60 s & critical \\
+StreamingQueryDown, ServiceDown & a Spark query stopped, or a service does not answer & critical \\
+KafkaConsumerLagHigh & a query is more than 2000 offsets behind & warning \\
+EndToEndLatencyHigh & Kafka to PostgreSQL takes more than 20 s & warning \\
+InvalidEventRateHigh & more than 5\% of events are invalid & warning \\
+BatchLayerBehind & more than one finished day is not processed & critical \\
+ExpenseFeedMissing & no partner file for 1.5 simulated days & critical \\
+VehicleIdleTooLong & a vehicle is idle for more than 90 simulated minutes & warning \\
+VehiclesBecomingUnprofitable & yesterday's report found vehicles that are becoming unprofitable & info \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Failure drill.} To test detection, we stopped the stream simulator for 215 real seconds (about
+seven simulated hours) and timed each alert.
+\DrillText{}

@@ -1,0 +1,58 @@
+% narrative sentences written after reading the results of the run (values from the database and the drill log)
+\newcommand{\LiveText}{The picture was taken at 15:02 on simulated Thursday 17 September, while the system was
+still running after the 15 measured days. At that moment 27 of the 30 vehicles were online. 37\% of them were
+carrying a passenger and 52\% were waiting for a ride. The fleet had finished 245 trips that day and earned
+236,296 LKR in fares. No vehicle had an open idle alert, and 8 vehicles had lost money so far that day (live
+fares minus fuel and the part of the daily maintenance cost used up so far).}
+
+\newcommand{\BusinessText}{Over the 15 days the fleet made 150,599 LKR net profit per day on average, and the
+vehicles carried a passenger in 39.6\% of their online time. The five vehicles with special profiles
+(Section~\ref{sec:sources}) behaved as planned, and the pipeline found each of them without being told:
+\begin{itemize}
+\item \textbf{V007} made 6,199 LKR on day 1 but lost 17,830 LKR on day 15. Its fuel cost rose from 19.0 to
+44.0 LKR per km, and its trips fell from 14 to 4 a day. It was first flagged as becoming unprofitable on day 3,
+its first day with a loss. From day 4 to day 10 the report listed it as unprofitable only, because each day
+had a service bill or a steady loss. From day 11 the loss grew again every day, so the flag came back.
+\item \textbf{V013} lost money only on its four service days, when maintenance cost 21,000 to 26,000 LKR. It
+was never flagged as becoming unprofitable, because one large bill is not a falling trend.
+\item \textbf{V026} made a profit on every day except its one service day, so a profit rule alone would miss
+it. But it claimed 184 km a day while the GPS showed only 138 km, and the report listed it every day for this
+gap (28 to 40\%).
+\item \textbf{V021} and \textbf{V027} made 2,654 LKR a day, less than half of the 6,267 LKR of the 23
+vehicles with no special profile or night shift. They were idle for 514 minutes a day (others: 349) and made
+9.7 trips (others: 17.0).
+\end{itemize}
+The pipeline also found one story that we did not plan. \textbf{V030} works at night, when there are few
+rides. It made only 588 LKR a day on average and was flagged three times (days 5, 8 and 14). In total the batch
+layer raised 9 ``becoming unprofitable'' flags in 15 days, 6 for V007 and 3 for V030, and none for any other
+vehicle.}
+
+\newcommand{\ReconText}{On an average day the speed layer missed about two trips, and its fares were 0.42\%
+below the exact batch value (never more than 1.11\%). So the live numbers are good enough to act on during the
+day, and the batch numbers are the final answer for money.}
+
+\newcommand{\HealthText}{Every DAG run succeeded. Two runs needed the automatic retry of the sensor
+\code{wait\_for\_expense\_file}, both times because we recreated a container (Airflow once and PostgreSQL once)
+while the sensor was running. The PostgreSQL restart also stopped the Spark streaming job. Docker restarted
+it, and its four queries continued from their checkpoints within about 20 seconds.
+
+We used the recompute path for a real reason. We changed the profit rule so that a service day does not count
+as a falling trend, and then triggered the DAG for days 1 to 13 through the Airflow REST API with the
+\code{sim\_date} parameter. The 13 runs took 7 minutes and 1 second in total, and the ``becoming unprofitable''
+flags for those days fell from 20 to 6. A rule change in a Lambda system is only a rerun of the batch layer.
+
+The alerts also caught one real mistake. At the start of the long run we lowered the memory of the Spark
+streaming driver, and Spark refused to start because it needs at least 450\,MB. SpeedLayerStale and
+ServiceDown (Spark) fired within two minutes of the first error, and both were resolved less than four
+minutes after it, once we set the memory back to 512\,MB.}
+
+\newcommand{\DrillText}{Figure~\ref{fig:health} shows the result. Within 12 seconds Prometheus marked
+ServiceDown (stream-producer) and NoTelemetryIngested as pending. Both were firing at 73 seconds, because the
+rules wait one minute to avoid false alarms. The API webhook received ServiceDown at 81 seconds. It did not
+receive NoTelemetryIngested, because the inhibition rule hides it while the producer is known to be down. So
+the team gets one clear message instead of two. SpeedLayerStale was firing at 113 seconds and reached the
+webhook at 122 seconds. This is correct, because the live dashboards had stopped changing. We started the
+producer again at 215 seconds. All alerts cleared within 18 seconds, and the ``resolved'' messages arrived 27
+and 47 seconds after the restart. The simulator does not send the events of the time when it was stopped, so
+the drill day (16 September) has a gap of about seven simulated hours. For this reason the results in
+Section~\ref{sec:daily} stop at 15 September.}

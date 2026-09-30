@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FleetPulse daily report {{ day }}</title>
+<style>
+  :root { --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; --bg:#f8fafc; --red:#b91c1c; --amber:#b45309; --green:#15803d; --grey:#475569; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: "Segoe UI", system-ui, -apple-system, Helvetica, Arial, sans-serif; color:var(--ink); background:var(--bg); font-size:13px; line-height:1.45; }
+  .page { max-width:1180px; margin:0 auto; padding:24px 20px 40px; }
+  header { background:#0f172a; color:#fff; border-radius:12px; padding:18px 22px; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  header h1 { margin:0; font-size:22px; }
+  header .sub { color:#cbd5e1; margin-top:4px; }
+  header .meta { text-align:right; color:#cbd5e1; font-size:12px; }
+  .kpis { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin:16px 0 12px; }
+  .kpi { background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  .kpi .label { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+  .kpi .value { font-size:20px; font-weight:700; margin-top:2px; }
+  .kpi .note { color:var(--muted); font-size:11px; }
+  .pills { display:flex; gap:8px; flex-wrap:wrap; }
+  .pill { border-radius:999px; padding:4px 12px; font-weight:600; font-size:12px; }
+  section { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-top:16px; }
+  h2 { font-size:16px; margin:0 0 2px; }
+  .hint { color:var(--muted); margin:0 0 10px; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th, td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+  th { background:#f1f5f9; font-weight:600; color:#334155; }
+  .n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .badge { display:inline-block; border-radius:6px; padding:2px 6px; font-size:11px; font-weight:700; white-space:nowrap; }
+  .UNPROFITABLE { background:#fee2e2; color:var(--red); }
+  .AT_RISK { background:#fef3c7; color:var(--amber); }
+  .PROFITABLE { background:#dcfce7; color:var(--green); }
+  .NO_COST_DATA { background:#e2e8f0; color:var(--grey); }
+  .flag { background:#fde68a; color:#78350f; }
+  .neg { color:var(--red); font-weight:600; }
+  table.heat td, table.heat th { text-align:center; padding:4px 2px; font-size:11px; border:1px solid #fff; }
+  table.heat td.zone, table.heat th.zone { text-align:left; padding-left:6px; white-space:nowrap; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  ul.reasons { margin:0; padding-left:16px; }
+  dl { display:grid; grid-template-columns:auto 1fr; gap:4px 12px; margin:0; }
+  dt { color:var(--muted); }
+  dd { margin:0; font-variant-numeric:tabular-nums; }
+  code { font-size:11px; background:#f1f5f9; padding:1px 4px; border-radius:4px; }
+  footer { color:var(--muted); font-size:11px; margin-top:16px; }
+  @media print { body { background:#fff; } section, .kpi, tr { break-inside:avoid; } }
+</style>
+</head>
+<body>
+<div class="page">
+{% set s = summary %}
+<header>
+  <div>
+    <h1>FleetPulse daily fleet report</h1>
+    <div class="sub">{{ day.strftime('%A %d %B %Y') }} (simulated day). Colombo ride-hailing fleet. Exact batch-layer results.</div>
+  </div>
+  <div class="meta">
+    Airflow run <code style="background:#1e293b;color:#e2e8f0">{{ run_id }}</code><br>
+    Generated {{ generated_at }}
+  </div>
+</header>
+
+<div class="kpis">
+  <div class="kpi"><div class="label">Trips completed</div><div class="value">{{ s.trips }}</div><div class="note">{{ s.active_vehicles }} vehicles worked today</div></div>
+  <div class="kpi"><div class="label">Fares earned</div><div class="value">LKR {{ s.revenue_lkr|lkr }}</div><div class="note">driver share {{ driver_share_pct }}%: LKR {{ s.driver_payout_lkr|lkr }}</div></div>
+  <div class="kpi"><div class="label">Fuel and maintenance</div><div class="value">LKR {{ (s.fuel_cost_lkr + s.maintenance_cost_lkr)|lkr }}</div><div class="note">fuel {{ s.fuel_cost_lkr|lkr }}, maintenance {{ s.maintenance_cost_lkr|lkr }}</div></div>
+  <div class="kpi"><div class="label">Fleet net profit</div><div class="value {% if s.net_profit_lkr < 0 %}neg{% endif %}">LKR {{ s.net_profit_lkr|lkr }}</div><div class="note">fleet utilization {{ s.fleet_utilization_pct|num }}% of online time</div></div>
+</div>
+
+<div class="pills">
+  <span class="pill UNPROFITABLE">{{ s.unprofitable_vehicles }} unprofitable</span>
+  <span class="pill AT_RISK">{{ s.at_risk_vehicles }} at risk (margin below {{ at_risk_margin_pct|num(0) }}%)</span>
+  <span class="pill flag">{{ s.becoming_unprofitable_vehicles }} becoming unprofitable</span>
+  <span class="pill NO_COST_DATA">{{ s.no_cost_data_vehicles }} without partner costs</span>
+  <span class="pill NO_COST_DATA">{{ s.long_idle_episodes }} idle episodes over {{ idle_alert_minutes }} min</span>
+</div>
+
+<section>
+  <h2>1. Vehicles that need attention</h2>
+  <p class="hint">Vehicles that lose money or keep a margin below {{ at_risk_margin_pct|num(0) }}% once the day's fuel and maintenance costs are applied, and vehicles whose reported kilometres do not match GPS. "Becoming unprofitable" means profit fell for two days in a row, or the vehicle was profitable yesterday and loses money today. Days with a garage service bill are not counted.</p>
+  {% if attention %}
+  <table>
+    <tr><th>Vehicle</th><th>Type</th><th class="n">Trips</th><th class="n">Fares</th><th class="n">Fuel</th><th class="n">Maint.</th><th class="n">Net profit</th><th class="n">Yesterday</th><th>Trend</th><th>Status</th><th>Why</th></tr>
+    {% for v in attention %}
+    <tr>
+      <td><b>{{ v.vehicle_id }}</b><br><span style="color:#64748b">{{ v.plate_no }}</span></td>
+      <td>{{ v.vehicle_type }}</td>
+      <td class="n">{{ v.trips }}</td>
+      <td class="n">{{ v.revenue_lkr|lkr }}</td>
+      <td class="n">{{ v.fuel_cost_lkr|lkr }}</td>
+      <td class="n">{{ v.maintenance_cost_lkr|lkr }}</td>
+      <td class="n {% if v.net_profit_lkr < 0 %}neg{% endif %}">{{ v.net_profit_lkr|lkr }}</td>
+      <td class="n">{{ v.prev_net_profit_lkr|lkr }}</td>
+      <td>{{ {'DECLINING': 'falling', 'IMPROVING': 'rising', 'STABLE': 'stable', 'NEW': 'new'}[v.trend] }}</td>
+      <td><span class="badge {{ v.status }}">{{ v.status|replace('_', ' ') }}</span>{% if v.becoming_unprofitable %}<br><span class="badge flag">becoming unprofitable</span>{% endif %}</td>
+      <td>{% if v.reasons %}<ul class="reasons">{% for r in v.reasons %}<li>{{ r }}</li>{% endfor %}</ul>{% else %}-{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}<p>No vehicle needs attention today.</p>{% endif %}
+</section>
+
+<section>
+  <h2>2. Profitability of every vehicle</h2>
+  <p class="hint">Net profit = fares - driver share ({{ driver_share_pct }}%) - fuel - maintenance. Distance gap compares partner-reported kilometres with GPS kilometres.</p>
+  <table>
+    <tr><th>Vehicle</th><th>Type</th><th class="n">Trips</th><th class="n">Fares</th><th class="n">Costs</th><th class="n">Net profit</th><th class="n">Margin</th><th class="n">GPS km</th><th class="n">Gap</th><th class="n">Busy</th><th>Status</th></tr>
+    {% for v in vehicles %}
+    <tr>
+      <td>{{ v.vehicle_id }}</td><td>{{ v.vehicle_type }}</td>
+      <td class="n">{{ v.trips }}</td>
+      <td class="n">{{ v.revenue_lkr|lkr }}</td>
+      <td class="n">{{ v.total_cost_lkr|lkr }}</td>
+      <td class="n {% if v.net_profit_lkr < 0 %}neg{% endif %}">{{ v.net_profit_lkr|lkr }}</td>
+      <td class="n">{% if v.margin_pct is not none %}{{ v.margin_pct|num(0) }}%{% else %}-{% endif %}</td>
+      <td class="n">{{ v.gps_distance_km|num }}</td>
+      <td class="n">{% if v.distance_gap_pct is not none %}{{ v.distance_gap_pct|num }}%{% else %}-{% endif %}</td>
+      <td class="n">{% if v.utilization_pct is not none %}{{ v.utilization_pct|num(0) }}%{% else %}-{% endif %}</td>
+      <td><span class="badge {{ v.status }}">{{ v.status|replace('_', ' ') }}</span></td>
+    </tr>
+    {% endfor %}
+  </table>
+</section>
+
+<section>
+  <h2>3. Earnings by zone and hour of day</h2>
+  <p class="hint">Fares in thousand LKR by pickup zone and the hour the trip ended. Darker cells earn more.</p>
+  <table class="heat">
+    <tr><th class="zone">Zone</th>{% for h in hours %}<th>{{ '%02d'|format(h) }}</th>{% endfor %}<th>Total</th><th>Trips</th></tr>
+    {% for row in heatmap %}
+    <tr>
+      <td class="zone">{{ row.zone }}</td>
+      {% for c in row.cells %}<td style="{{ c.style }}">{% if c.value %}{{ '%.1f'|format(c.value / 1000) }}{% endif %}</td>{% endfor %}
+      <td><b>{{ '%.1f'|format(row.total / 1000) }}</b></td><td>{{ row.trips }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</section>
+
+<div class="grid2">
+<section>
+  <h2>4. Long idle periods</h2>
+  <p class="hint">Vehicles that stayed idle for {{ idle_alert_minutes }} simulated minutes or more in one stretch.</p>
+  {% if idle %}
+  <table>
+    <tr><th>Vehicle</th><th>Type</th><th class="n">Longest idle</th><th class="n">Episodes</th><th class="n">Idle share</th></tr>
+    {% for v in idle %}
+    <tr><td>{{ v.vehicle_id }}</td><td>{{ v.vehicle_type }}</td><td class="n">{{ v.max_idle_streak_min|num(0) }} min</td><td class="n">{{ v.long_idle_episodes }}</td>
+        <td class="n">{% if v.online_min %}{{ (100 * v.idle_min / v.online_min)|num(0) }}%{% else %}-{% endif %}</td></tr>
+    {% endfor %}
+  </table>
+  {% else %}<p>No long idle periods.</p>{% endif %}
+</section>
+
+<section>
+  <h2>5. Data quality and lineage</h2>
+  <p class="hint">What the batch layer cleaned, and where the numbers came from.</p>
+  <dl>
+    <dt>Telemetry events</dt><dd>{{ '{:,}'.format(s.events_total) }}</dd>
+    <dt>Invalid events</dt><dd>{{ s.events_invalid }} (sent to the dead-letter queue)</dd>
+    <dt>Duplicates removed</dt><dd>{{ s.duplicates_removed }}</dd>
+    <dt>Late arrivals</dt><dd>{{ s.late_events }} events arrived more than 10 simulated minutes late</dd>
+    <dt>Partner file</dt><dd>{% if batch_file %}<code>{{ batch_file.file_name }}</code> sha256 <code>{{ batch_file.sha256[:12] }}</code>{% else %}-{% endif %}</dd>
+    <dt>Partner rows</dt><dd>{{ s.expense_rows }} received, {{ s.expense_rows_valid }} valid, {{ s.expense_rows_quarantined }} quarantined</dd>
+    <dt>Distance mismatches</dt><dd>{{ s.distance_mismatch_vehicles }} vehicle{{ '' if s.distance_mismatch_vehicles == 1 else 's' }}</dd>
+  </dl>
+  {% if quarantine %}
+  <table style="margin-top:10px">
+    <tr><th class="n">Row</th><th>Record</th><th>Vehicle</th><th>Reason</th></tr>
+    {% for q in quarantine %}<tr><td class="n">{{ q.row_no }}</td><td>{{ q.record_id or '-' }}</td><td>{{ q.vehicle_id or '-' }}</td><td>{{ q.reasons|join(', ') }}</td></tr>{% endfor %}
+  </table>
+  {% endif %}
+  <table style="margin-top:10px">
+    <tr><th>Speed vs batch layer</th><th class="n">Speed</th><th class="n">Batch</th><th class="n">Difference</th></tr>
+    {% for r in reconciliation %}
+    <tr><td>{{ {'trips_completed': 'trips', 'earnings_lkr': 'fares (LKR)', 'pings': 'GPS pings'}.get(r.metric, r.metric) }}</td><td class="n">{{ r.speed_value|lkr }}</td><td class="n">{{ r.batch_value|lkr }}</td>
+        <td class="n">{% if r.diff_pct is not none %}{{ r.diff_pct|num(2) }}%{% else %}-{% endif %}</td></tr>
+    {% endfor %}
+  </table>
+</section>
+</div>
+
+<footer>
+  Built by the Airflow DAG <code>fleet_daily_batch</code>. All numbers are recomputed by the Spark batch layer from the raw master dataset
+  (Kafka archive in Parquet) joined with the partner cost file. Simulated clock: 1 real second = 2 simulated minutes.
+</footer>
+</div>
+</body>
+</html>

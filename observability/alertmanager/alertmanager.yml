@@ -1,0 +1,26 @@
+# Every alert goes to the serving API webhook, which logs it as JSON and stores
+# it in ops.alert_notifications (visible in Grafana and at /api/v1/alerts/notifications).
+route:
+  receiver: fleet-api-webhook
+  # one group per vehicle for business alerts, one group per alert name otherwise
+  group_by: ["alertname", "severity", "vehicle_id"]
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 30m
+  routes:
+    - matchers: ['severity="info"']
+      receiver: fleet-api-webhook
+      repeat_interval: 2h
+
+receivers:
+  - name: fleet-api-webhook
+    webhook_configs:
+      - url: http://api:8000/api/v1/alerts/webhook
+        send_resolved: true
+
+# When the Spark driver itself is down, do not also send the alerts it causes.
+inhibit_rules:
+  - source_matchers: ['alertname="ServiceDown"', 'job="spark-speed-layer"']
+    target_matchers: ['alertname=~"SpeedLayerStale|StreamingQueryDown|EndToEndLatencyHigh"']
+  - source_matchers: ['alertname="ServiceDown"', 'job="stream-producer"']
+    target_matchers: ['alertname="NoTelemetryIngested"']

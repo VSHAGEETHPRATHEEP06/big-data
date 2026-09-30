@@ -1,0 +1,88 @@
+\section{Architecture decision: Lambda or Kappa}
+
+\subsection{The two options}
+Both architectures keep raw events in an append-only store and build views from them \cite{kleppmann2017}. They differ in how
+they compute and recompute those views.
+
+\textbf{Lambda} has three layers \cite{marz2015}. The \emph{batch layer} keeps all raw data in a master
+dataset that never changes and recomputes views from it on a schedule. The \emph{speed layer} processes
+new events as they arrive and covers the time until the next batch run. The \emph{serving layer} merges
+both kinds of views for users.
+
+\textbf{Kappa} has only a stream layer \cite{kreps2014}. All data, old and new, is a stream in a log such
+as Kafka. There is one processing job. To recompute, a second copy of the job reads the log again from an
+old offset, and users switch to it when it catches up.
+
+\subsection{Comparing the options with our requirements}
+Table~\ref{tab:lambda-kappa} compares the two options against the requirements in
+Table~\ref{tab:requirements}.
+
+\begin{table}[!htb]
+\centering\small
+\caption{Lambda and Kappa compared for our use case. The last column shows which option fits us better.}
+\label{tab:lambda-kappa}
+\begin{tabularx}{\textwidth}{@{}P{2.6cm} L L P{1.2cm}@{}}
+\toprule
+\textbf{Criterion} & \textbf{Lambda} & \textbf{Kappa} & \textbf{Better} \\
+\midrule
+Latency (R1 to R3) & The speed layer updates every 5 to 10 seconds. & The stream job updates every few seconds. & equal \\
+Exact money (R4, R5) & The batch layer reads the complete day after late events and the cost file have arrived. & Windows close at a watermark. Later events are dropped or need extra update logic after results are published. & Lambda \\
+Daily cost file & Read directly as a batch input. & Must become a stream and wait in state until a full day of trips is ready. & Lambda \\
+Recompute a day (R6) & Rerun the Airflow DAG for that day from Parquet files. & Replay the Kafka log from an old offset with a second copy of the job. & Lambda \\
+Storage cost & Cheap compressed Parquet files keep all history. & Kafka must keep weeks or months of events. & Lambda \\
+Code & Two paths (stream and batch) that can drift apart. & One code path. & Kappa \\
+Operations & More parts: Airflow, a batch job and merge views. & Fewer parts. & Kappa \\
+Consistency & Live views are temporary. Batch views become the truth for finished days. & One view, but its accuracy depends on the watermark. & Lambda \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Our decision: Lambda}
+We chose the Lambda architecture for five reasons.
+\begin{enumerate}
+\item \textbf{Two very different sources.} One source is a continuous stream and the other is one file
+per day. The daily file is a natural batch input, and the daily report is a natural batch output.
+\item \textbf{Money must be exact.} Vehicles in our simulation sometimes lose signal for 20 to 60 simulated
+minutes and then send all the old events at once. In our run, about \LateEventsPerDay{} events per day
+arrived more than 10 simulated minutes late. To keep its state small, the speed layer closes each window
+soon after it ends, so events that arrive later are lost. The batch layer starts only after the day and a
+grace period have ended, so it counts every event, removes repeats over the whole day and joins the complete
+cost file.
+\item \textbf{Recomputing is cheap and simple.} One simulated day has about \EventsPerDay{} events, which is
+only a few megabytes of Parquet. If a partner sends a corrected cost file, we rerun the DAG for that day.
+Nothing in Kafka has to be replayed and Kafka can keep a short retention.
+\item \textbf{Latency is still low.} The speed layer writes to PostgreSQL every 5 to 10 seconds, so the
+live dashboard meets requirements R1 to R3.
+\item \textbf{The tools fit.} Airflow is built for scheduled batch jobs, and Spark can run both the
+streaming job and the batch job with the same API.
+\end{enumerate}
+
+\subsection{The rejected alternative: Kappa}
+In a Kappa design, the batch simulator would send its cost rows into a Kafka topic. One Spark streaming job
+would keep a full day of trip totals per vehicle in its state and join them with the cost rows when they
+arrive. To fix a day, we would replay the log from an old offset. We rejected this design because the join
+needs a whole day of state for every vehicle, because late events after the watermark would change money
+numbers that were already published, and because replay needs Kafka to keep all history. Kappa does have a
+real advantage: one code path and fewer moving parts. If costs arrived as live events, or if the business
+only needed live numbers, Kappa would be the better choice.
+
+\subsection{How we reduce the weak points of Lambda}
+The main problem of Lambda is keeping two code paths correct and in step. We reduce it in four ways.
+\begin{itemize}
+\item \textbf{One engine.} Both layers use Spark 4.1 and the same DataFrame API.
+\item \textbf{Shared code.} Parsing, validation, the zone lookup, the metric definitions and the profit rules
+live in one module (\code{fleet\_transforms.py}) that both layers import. A unit test checks that the Spark
+version and the Python version of the profit rules give the same answer.
+\item \textbf{A clear hand-over.} For a finished day the serving views show batch results only. The DAG then
+deletes speed-layer rows for older days (Figure~\ref{fig:handover}).
+\item \textbf{Reconciliation.} After each batch run we compare the speed and batch totals of the day and store
+the difference (Section~\ref{sec:reconciliation}).
+\end{itemize}
+
+\begin{figure}[!htb]
+\centering
+\input{figures/handover}
+\caption{How the serving layer uses the two layers over time. Finished days come from the batch layer.
+Today comes from the speed layer until the batch run for today replaces it after midnight.}
+\label{fig:handover}
+\end{figure}

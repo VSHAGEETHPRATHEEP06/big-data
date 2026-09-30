@@ -1,0 +1,18 @@
+\begin{tikzpicture}
+\begin{axis}[width=0.92\textwidth, height=5.6cm, font=\sffamily\footnotesize,
+  xtick={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}, xticklabels={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}, xmin=0.7, xmax=15.3,
+  xlabel={simulated day in September 2026}, ylabel={net profit (LKR)}, ymajorgrids, grid style={black!12},
+  yticklabel style={/pgf/number format/fixed, /pgf/number format/1000 sep={,}},
+  scaled y ticks=false, legend style={font=\sffamily\scriptsize, at={(0.5,-0.3)}, anchor=north,
+  legend columns=2, draw=none}]
+\addplot[black!40, thin, forget plot] coordinates {(0.7,0) (15.3,0)};
+\addplot[red, mark=square*, thick] coordinates {(1,6199) (2,3182) (3,-1157) (4,-14735) (5,-5858) (6,-18855) (7,-6512) (8,-22536) (9,-10842) (10,-10968) (11,-11826) (12,-12607) (13,-15145) (14,-15331) (15,-17830)};
+\addlegendentry{V007 (degrading)}
+\addplot[orange, mark=triangle*, thick] coordinates {(1,2176) (2,4601) (3,4073) (4,-14521) (5,6169) (6,4232) (7,4119) (8,-7005) (9,4059) (10,6783) (11,6212) (12,-9324) (13,-12975) (14,4795) (15,3947)};
+\addlegendentry{V013 (high maintenance)}
+\addplot[blue, mark=diamond*, thick] coordinates {(1,7033) (2,7196) (3,7909) (4,6201) (5,9771) (6,9249) (7,9023) (8,7427) (9,-4294) (10,9641) (11,7474) (12,8095) (13,6323) (14,6928) (15,10933)};
+\addlegendentry{V026 (fuel anomaly)}
+\addplot[black!60, dashed, thick, mark=*] coordinates {(1,6226) (2,6591) (3,5401) (4,5695) (5,5258) (6,5096) (7,5053) (8,5858) (9,4588) (10,6145) (11,6017) (12,6362) (13,6178) (14,5724) (15,4902)};
+\addlegendentry{average of other vehicles}
+\end{axis}
+\end{tikzpicture}

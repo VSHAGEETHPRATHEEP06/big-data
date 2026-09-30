@@ -1,0 +1,13 @@
+.git
+.env
+**/__pycache__
+**/*.pyc
+report/
+docs/
+output/
+submission/
+*.pdf
+*.zip
+.venv
+node_modules
+scripts/screenshots/node_modules

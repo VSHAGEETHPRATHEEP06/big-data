@@ -1,0 +1,55 @@
+\section{Introduction}
+
+\subsection{Use case}
+We chose Use Case 1, Ride-Hailing Fleet Operations. Our operator, FleetPulse, runs 30 vehicles in
+Colombo: 13 tuk-tuks, 10 mini cars and 7 cars. The operator owns the vehicles. It pays for fuel and
+maintenance and gives each driver 30\% of the fares. We divided the city into 12 zones, such as
+Fort-Pettah, Kollupitiya, Borella, Wellawatte and Nugegoda. The use case asks one question with two parts:
+
+\begin{quote}\itshape
+``What is fleet utilization and earnings by area/time-of-day right now, and which vehicles are becoming
+unprofitable once yesterday's fuel/maintenance costs are factored in?''
+\end{quote}
+
+The first part needs fresh numbers within seconds. The second part needs exact money numbers, but only once
+a day. This difference is the main reason for our design.
+
+\subsection{Business requirements}
+Table~\ref{tab:requirements} lists the requirements we took from the use case. The last two columns show how
+fast and how exact each answer must be.
+
+\begin{table}[!htb]
+\centering\small
+\caption{Business requirements taken from the use case.}
+\label{tab:requirements}
+\begin{tabularx}{\textwidth}{@{}l L P{2.9cm} P{3.6cm}@{}}
+\toprule
+\textbf{ID} & \textbf{Requirement} & \textbf{How fast} & \textbf{How exact} \\
+\midrule
+R1 & Live fleet status: vehicles online, on a trip and idle & a few seconds & approximate is fine \\
+R2 & Utilisation and fares by zone and hour of day & seconds & small errors are fine \\
+R3 & Alert when a vehicle stays idle for a long time & simulated minutes & one alert per idle period \\
+R4 & Daily profit of each vehicle after fuel and maintenance & once per day & exact, it is money \\
+R5 & Find vehicles that are becoming unprofitable & once per day & exact, needs history \\
+R6 & Recompute a day when late data or a corrected file arrives & on request & exact and repeatable \\
+R7 & Show the health of every pipeline stage & seconds & logs, metrics and alerts \\
+R8 & Run on one laptop with 8\,GB of memory & always & low memory and CPU \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Simulated clock and assumptions}
+A real business day is long. To show many days in a short demo, we compress time. One real second is two
+simulated minutes (a speed-up of 120), so 30 real seconds are one simulated hour and 12 real minutes are one
+simulated day. The simulation starts on Tuesday 1~September~2026 at 06:00, so day~1 is 18 hours long and
+later days are 24 hours long. All simulated times are Sri Lanka local time. The clock is stored in one
+database row, so every container agrees on the simulated ``now''. If the whole system stops for more than
+five minutes, simulated time pauses and continues after the restart.
+
+We also made these assumptions:
+\begin{itemize}
+\item Both data sources are Python scripts. The numbers are realistic but they are not real company data.
+\item Money is in Sri Lankan rupees (LKR). Petrol costs about LKR 305 per litre.
+\item The daily cost file arrives 20 to 90 simulated minutes after midnight (10 to 45 real seconds).
+\item Kafka, Spark and PostgreSQL each run as a single node. This is enough for about 30 events per second.
+\end{itemize}

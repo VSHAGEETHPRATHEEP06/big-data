@@ -1,0 +1,70 @@
+% FleetPulse architecture (Lambda). Drawn at text width (16 cm), no scaling needed.
+\begin{tikzpicture}[
+  font=\sffamily\scriptsize,
+  box/.style={draw=black!55, rounded corners=2pt, align=center, inner sep=2.5pt, line width=0.5pt},
+  arrow/.style={-{Stealth[length=2mm]}, line width=0.7pt, draw=black!70},
+  dashedarrow/.style={arrow, dashed},
+  lbl/.style={font=\sffamily\tiny, text=black, inner sep=2.4pt},
+  layer/.style={font=\sffamily\scriptsize\bfseries, text=black},
+]
+% ---- layer titles
+\node[layer] at (1.25, 8.00) {SOURCES};
+\node[layer] at (4.60, 8.00) {INGESTION};
+\node[layer] at (8.30, 8.00) {PROCESSING};
+\node[layer] at (11.90, 8.00) {STORAGE};
+\node[layer] at (14.90, 8.00) {SERVING};
+
+% ---- sources (x 0.10 to 2.30)
+\node[box, fill=black!6, text width=2.2cm, minimum height=1.4cm] (ss) at (1.25, 6.40)
+  {\textbf{Stream simulator}\\Python, 30 vehicles,\\one ping per second};
+\node[box, fill=black!6, text width=2.2cm, minimum height=1.4cm] (bs) at (1.25, 2.50)
+  {\textbf{Batch simulator}\\Python, cost file\\once per day};
+
+% ---- ingestion (x 3.20 to 5.90)
+\node[box, fill=orange!14, text width=2.75cm, minimum height=2.3cm] (kafka) at (4.60, 6.40)
+  {\textbf{Apache Kafka 4.3}\\KRaft, one broker\\[2pt]topic\\\texttt{fleet.telemetry.raw}\\6 partitions,\\key = vehicle id\\[2pt]+ dead-letter topic};
+\node[box, fill=orange!14, text width=2.75cm, minimum height=1.4cm] (land) at (4.60, 2.50)
+  {\textbf{Landing zone}\\daily CSV file and\\manifest (SHA-256)};
+
+% ---- processing (x 6.75 to 9.85)
+\node[box, fill=teal!14, text width=2.9cm, minimum height=2.3cm] (speed) at (8.30, 6.40)
+  {\textbf{Speed layer}\\Spark 4.1 Structured\\Streaming: validate,\\de-duplicate, watermark,\\zone join, 1 h and 1 day\\windows, idle alerts};
+\node[box, fill=violet!12, text width=2.9cm, minimum height=0.9cm] (lake) at (8.30, 4.45)
+  {\textbf{Master dataset}\\immutable raw Parquet};
+\node[box, fill=blue!10, text width=2.9cm, minimum height=1.9cm] (batch) at (8.30, 2.50)
+  {\textbf{Batch layer}\\Airflow 3.3 DAG runs a\\Spark 4.1 batch job\\once per day: exact\\recompute and join\\with partner costs};
+
+% ---- storage (x 10.75 to 13.05)
+\node[box, fill=violet!12, text width=2.1cm, minimum height=5.4cm] (pg) at (11.90, 4.45)
+  {\textbf{PostgreSQL 17}\\[5pt]\texttt{speed.*}\\real-time views\\[5pt]\texttt{batch.*}\\exact daily views\\[5pt]\texttt{serving.*}\\merge views\\[5pt]\texttt{ops.*}\\audit, alerts, clock};
+
+% ---- serving (x 13.80 to 16.00)
+\node[box, fill=green!12, text width=2.0cm, minimum height=1.0cm] (api) at (14.90, 6.40)
+  {\textbf{FastAPI}\\REST and /metrics};
+\node[box, fill=green!12, text width=2.0cm, minimum height=1.0cm] (graf) at (14.90, 4.45)
+  {\textbf{Grafana 12}\\3 dashboards};
+\node[box, fill=green!12, text width=2.0cm, minimum height=1.0cm] (rep) at (14.90, 2.50)
+  {\textbf{Daily report}\\HTML and CSV};
+
+% ---- data flow
+\draw[arrow] (ss) -- node[lbl, above] {JSON} (kafka);
+\draw[arrow] (kafka) -- node[lbl, above] {stream} (speed);
+\draw[arrow] (bs) -- node[lbl, above] {CSV} (land);
+\draw[arrow] (land) -- node[lbl, above] {sensor} (batch);
+\draw[dashedarrow] (speed) -- node[lbl, right] {raw archive} (lake);
+\draw[arrow] (lake) -- node[lbl, right] {one day} (batch);
+\draw[arrow] (speed.east) -- node[lbl, above] {upsert} (speed.east -| pg.west);
+\draw[arrow] (batch.east) -- node[lbl, above] {one txn} (batch.east -| pg.west);
+\draw[arrow] (pg.east |- api.west) -- (api.west);
+\draw[arrow] (pg.east |- graf.west) -- (graf.west);
+\draw[arrow] (pg.east |- rep.west) -- (rep.west);
+
+% ---- observability band (x 0.10 to 16.00)
+\node[box, fill=yellow!16, text width=15.6cm, minimum height=0.8cm, anchor=west] (obs) at (0.10, 0.60)
+  {\textbf{Observability:} JSON logs from every stage \,\textbullet\, Prometheus 3 metrics (producers, Spark listener,
+   API, Airflow via StatsD) \,\textbullet\, 14 alert rules $\rightarrow$ Alertmanager $\rightarrow$ API webhook
+   \,\textbullet\, lineage and audit tables};
+\foreach \n in {bs, land, batch, pg, rep} {
+  \draw[densely dotted, draw=black!45, line width=0.6pt] (\n.south) -- (\n.south |- obs.north);
+}
+\end{tikzpicture}

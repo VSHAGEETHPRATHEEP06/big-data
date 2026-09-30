@@ -1,0 +1,27 @@
+% Timeline of the Lambda hand-over from the speed layer to the batch layer
+\begin{tikzpicture}[font=\sffamily\scriptsize, x=0.92cm, y=1cm]
+% axis
+\draw[-{Stealth[length=2mm]}, line width=0.6pt] (0,0) -- (15.8,0) node[right] {time};
+\foreach \x in {0, 5, 10, 15} { \draw[line width=0.6pt] (\x,0.08) -- (\x,-0.08); }
+\node[below] at (0,-0.08) {00:00};
+\node[below] at (5,-0.08) {00:00};
+\node[below] at (10,-0.08) {00:00};
+\node[below] at (15,-0.08) {00:00};
+\node[font=\sffamily\scriptsize\bfseries] at (2.5,-0.45) {day D-2};
+\node[font=\sffamily\scriptsize\bfseries] at (7.5,-0.45) {day D-1};
+\node[font=\sffamily\scriptsize\bfseries] at (12.5,-0.45) {day D (today)};
+% served views
+\node[anchor=east, align=right] at (-0.15,0.75) {served\\view};
+\fill[green!25, draw=green!50!black, line width=0.4pt] (0.05,0.45) rectangle (4.95,1.05);
+\node at (2.5,0.75) {batch view (exact)};
+\fill[green!25, draw=green!50!black, line width=0.4pt] (5.05,0.45) rectangle (9.95,1.05);
+\node at (7.5,0.75) {batch view (exact)};
+\fill[orange!25, draw=orange!60!black, line width=0.4pt] (10.05,0.45) rectangle (13.4,1.05);
+\node at (11.72,0.75) {speed view (live)};
+% now marker
+\draw[dashed, line width=0.6pt] (13.4,-0.05) -- (13.4,1.55);
+\node[above] at (13.4,1.55) {now};
+% batch run for D-1
+\draw[-{Stealth[length=2mm]}, line width=0.6pt] (10.35,1.75) -- (10.35,1.10);
+\node[above, align=center] at (10.35,1.75) {cost file for D-1 arrives: the batch run\\replaces the speed rows of D-1};
+\end{tikzpicture}

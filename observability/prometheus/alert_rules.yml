@@ -1,0 +1,121 @@
+# Alert and health-check rules.
+# Simulated clock: 1 real second = 2 simulated minutes, 1 simulated day = 720 s.
+groups:
+  - name: pipeline-health
+    rules:
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.job }} ({{ $labels.stage }} stage) is down"
+          description: "Prometheus could not scrape {{ $labels.instance }} for 1 minute."
+
+      - alert: NoTelemetryIngested
+        expr: sum(rate(producer_events_sent_total[1m])) == 0 or absent(producer_events_sent_total)
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "No telemetry was written to Kafka in the last minute"
+          description: "The streaming source sent no events for 1 real minute (2 simulated hours)."
+
+      - alert: SpeedLayerStale
+        expr: pipeline_speed_layer_freshness_seconds > 60
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Speed layer has not written new vehicle state for {{ $value | printf \"%.0f\" }} s"
+          description: "No new data reached PostgreSQL from Spark Structured Streaming for over 60 real seconds."
+
+      - alert: StreamingQueryDown
+        expr: min by (query) (speed_query_active) == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Spark streaming query {{ $labels.query }} is not running"
+
+      - alert: KafkaConsumerLagHigh
+        expr: max by (query) (speed_kafka_offsets_behind_latest) > 2000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Query {{ $labels.query }} is {{ $value | printf \"%.0f\" }} offsets behind Kafka"
+
+      - alert: SpeedBatchesSlow
+        expr: max by (query) (speed_query_batch_duration_seconds) > 15
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Micro-batches of {{ $labels.query }} take {{ $value | printf \"%.1f\" }} s, longer than the trigger interval"
+
+      - alert: EndToEndLatencyHigh
+        expr: max by (query) (speed_e2e_latency_seconds) > 20
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Kafka to PostgreSQL latency of {{ $labels.query }} is {{ $value | printf \"%.1f\" }} s"
+
+      - alert: ProducerErrorRateHigh
+        expr: sum(rate(producer_send_errors_total[2m])) / clamp_min(sum(rate(producer_send_attempts_total[2m])), 1) > 0.05
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "More than 5% of telemetry events fail to reach Kafka"
+
+      - alert: InvalidEventRateHigh
+        expr: sum(rate(speed_dead_letter_events_total[5m])) / clamp_min(sum(rate(speed_valid_events_total[5m])), 1) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "More than 5% of telemetry events are invalid and go to the dead-letter queue"
+
+      - alert: BatchLayerBehind
+        expr: pipeline_batch_days_behind > 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $value }} finished simulated days are not processed by the batch layer"
+
+      - alert: ExpenseFeedMissing
+        expr: time() - batch_producer_last_drop_timestamp_seconds > 1080
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "No partner expense file for 1.5 simulated days"
+
+      - alert: AirflowSchedulerDown
+        expr: rate(airflow_scheduler_heartbeat[2m]) == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "The Airflow scheduler has stopped sending heartbeats"
+
+  - name: fleet-business
+    rules:
+      - alert: VehicleIdleTooLong
+        expr: fleet_vehicle_idle_sim_minutes > 60
+        labels:
+          severity: warning
+          team: fleet-ops
+        annotations:
+          summary: "Vehicle {{ $labels.vehicle_id }} idle for {{ $value | printf \"%.0f\" }} simulated minutes in {{ $labels.zone }}"
+
+      - alert: VehiclesBecomingUnprofitable
+        expr: fleet_becoming_unprofitable_vehicles_last_day > 0
+        labels:
+          severity: info
+          team: fleet-finance
+        annotations:
+          summary: "{{ $value }} vehicles became unprofitable after yesterday's fuel and maintenance costs"

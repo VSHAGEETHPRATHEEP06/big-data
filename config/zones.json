@@ -1,0 +1,21 @@
+{
+  "description": "Operating zones for the simulated Colombo ride-hailing fleet. A GPS point belongs to the nearest zone centre within max_radius_km, otherwise to 'Outer Area'.",
+  "cell_size_deg": 0.005,
+  "max_radius_km": 3.0,
+  "bbox": {"lat_min": 6.83, "lat_max": 6.97, "lon_min": 79.83, "lon_max": 79.94},
+  "outer_zone": "Outer Area",
+  "zones": [
+    {"zone_id": "Z01", "zone_name": "Fort-Pettah",      "lat": 6.9355, "lon": 79.8480, "area_type": "cbd"},
+    {"zone_id": "Z02", "zone_name": "Kotahena",         "lat": 6.9475, "lon": 79.8615, "area_type": "residential"},
+    {"zone_id": "Z03", "zone_name": "Maradana",         "lat": 6.9290, "lon": 79.8650, "area_type": "commercial"},
+    {"zone_id": "Z04", "zone_name": "Borella",          "lat": 6.9145, "lon": 79.8780, "area_type": "commercial"},
+    {"zone_id": "Z05", "zone_name": "Kollupitiya",      "lat": 6.9115, "lon": 79.8505, "area_type": "cbd"},
+    {"zone_id": "Z06", "zone_name": "Cinnamon Gardens", "lat": 6.9060, "lon": 79.8650, "area_type": "admin"},
+    {"zone_id": "Z07", "zone_name": "Bambalapitiya",    "lat": 6.8930, "lon": 79.8555, "area_type": "commercial"},
+    {"zone_id": "Z08", "zone_name": "Wellawatte",       "lat": 6.8745, "lon": 79.8600, "area_type": "residential"},
+    {"zone_id": "Z09", "zone_name": "Dehiwala",         "lat": 6.8515, "lon": 79.8655, "area_type": "residential"},
+    {"zone_id": "Z10", "zone_name": "Nugegoda",         "lat": 6.8725, "lon": 79.8890, "area_type": "residential"},
+    {"zone_id": "Z11", "zone_name": "Rajagiriya",       "lat": 6.9095, "lon": 79.8950, "area_type": "residential"},
+    {"zone_id": "Z12", "zone_name": "Battaramulla",     "lat": 6.8995, "lon": 79.9185, "area_type": "residential"}
+  ]
+}

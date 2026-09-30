@@ -1,0 +1,4 @@
+fastapi==0.142.1
+uvicorn==0.54.0
+psycopg2-binary==2.9.13
+prometheus-client==0.26.0

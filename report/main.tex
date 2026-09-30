@@ -1,0 +1,118 @@
+\documentclass[11pt,a4paper]{article}
+
+% ---------------------------------------------------------------- layout
+\usepackage[a4paper,top=2.2cm,bottom=2.3cm,left=2.2cm,right=2.2cm,headheight=14pt]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{mathptmx}
+\usepackage[scaled=0.92]{helvet}
+\usepackage{inconsolata}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{needspace}
+\usepackage{fancyvrb}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt plus 1pt}
+\setlist{itemsep=2pt,topsep=3pt,parsep=0pt,leftmargin=*}
+\captionsetup{font=small,labelfont=bf,skip=5pt}
+\renewcommand{\arraystretch}{1.1}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\setcounter{tocdepth}{1}
+
+\titleformat{\section}{\sffamily\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\sffamily\large\bfseries}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\sffamily\normalsize\bfseries}{\thesubsubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{12pt}{5pt}
+\titlespacing*{\subsection}{0pt}{9pt}{3pt}
+\titlespacing*{\subsubsection}{0pt}{7pt}{2pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\sffamily\small EC8203 Mini Project: FleetPulse}
+\fancyhead[R]{\sffamily\small Lambda architecture for a ride-hailing fleet}
+\fancyfoot[C]{\sffamily\small Page \thepage\ of \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\newcommand{\code}[1]{\texttt{#1}}
+% alert names are identifiers, never split them at a line end
+\hyphenation{ServiceDown SpeedLayerStale NoTelemetryIngested StreamingQueryDown KafkaConsumerLagHigh EndToEndLatencyHigh InvalidEventRateHigh BatchLayerBehind ExpenseFeedMissing VehicleIdleTooLong VehiclesBecomingUnprofitable FleetPulse PostgreSQL}
+\input{sections/numbers}
+\input{sections/narrative}
+
+\begin{document}
+
+% ---------------------------------------------------------------- title page
+\begin{titlepage}
+\centering
+\vspace*{0.2cm}
+\includegraphics[height=3.4cm]{figures/university_logo.jpg}\par
+\vspace{0.5cm}
+{\sffamily\large UNIVERSITY OF RUHUNA\par}
+\vspace{2pt}
+{\sffamily\large Faculty of Engineering\par}
+\vspace{1.3cm}
+{\sffamily\Large EC8203 Applied Big Data Engineering\par}
+\vspace{4pt}
+{\sffamily\large Mini Project Report\par}
+\vspace{1.8cm}
+{\sffamily\fontsize{30}{36}\selectfont\bfseries FleetPulse\par}
+\vspace{0.5cm}
+{\sffamily\Large A Lambda Architecture for Real-Time Fleet Utilisation\\[2pt] and Daily Vehicle Profitability\par}
+\vspace{0.6cm}
+{\sffamily\large Use Case 1: Ride-Hailing Fleet Operations\par}
+\vfill
+{\sffamily\large Group members\par}
+\vspace{8pt}
+\begin{tabular}{ll}
+\toprule
+\textbf{Name} & \textbf{Registration number} \\
+\midrule
+Arivanan V. & EG/2021/4414 \\
+Shageethpratheep V. & EG/2021/4809 \\
+Shayanthavi T. & EG/2021/4811 \\
+\bottomrule
+\end{tabular}
+\vfill
+{\sffamily\large 30 September 2026\par}
+\vspace*{0.4cm}
+\end{titlepage}
+
+% ---------------------------------------------------------------- abstract
+\section*{Abstract}
+\input{sections/00_abstract}
+
+\input{sections/01_introduction}
+\input{sections/02_architecture_decision}
+\input{sections/03_design}
+\input{sections/04_tech_stack}
+\input{sections/05_implementation}
+\input{sections/06_observability}
+\input{sections/07_results}
+\input{sections/08_limitations}
+\input{sections/09_conclusion}
+
+\end{document}

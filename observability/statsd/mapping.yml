@@ -1,0 +1,38 @@
+# Maps Airflow StatsD metrics to Prometheus metrics with labels.
+# Metrics that match no rule are still exported (dots become underscores),
+# for example airflow_scheduler_heartbeat.
+mappings:
+  - match: "airflow.dagrun.duration.success.*"
+    name: "airflow_dagrun_duration_success"
+    labels:
+      dag_id: "$1"
+  - match: "airflow.dagrun.duration.failed.*"
+    name: "airflow_dagrun_duration_failed"
+    labels:
+      dag_id: "$1"
+  - match: "airflow.ti.finish.*.*.*"
+    name: "airflow_task_finished_total"
+    labels:
+      dag_id: "$1"
+      task_id: "$2"
+      state: "$3"
+  - match: "airflow.dag.*.*.duration"
+    name: "airflow_task_duration"
+    labels:
+      dag_id: "$1"
+      task_id: "$2"
+  # glob matching only allows "*" as a whole component, so these use regex
+  - match: 'airflow\.operator_failures_(.+)'
+    match_type: regex
+    name: "airflow_operator_failures_total"
+    labels:
+      operator: "$1"
+  - match: 'airflow\.operator_successes_(.+)'
+    match_type: regex
+    name: "airflow_operator_successes_total"
+    labels:
+      operator: "$1"
+  - match: "airflow.pool.open_slots.*"
+    name: "airflow_pool_open_slots"
+    labels:
+      pool: "$1"

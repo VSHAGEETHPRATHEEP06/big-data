@@ -1,0 +1,22 @@
+\begin{table}[!htb]
+\centering\small
+\caption{Speed and resource use during the run.}
+\label{tab:perf}
+\begin{tabularx}{\textwidth}{@{}L r@{}}
+\toprule
+\textbf{Measure} & \textbf{Value} \\
+\midrule
+Events per second into Kafka (average) & 15.8 \\
+Producer delivery latency, 95th percentile & 48\,ms \\
+End-to-end latency Kafka to PostgreSQL, vehicle state (average) & 2.3\,s \\
+End-to-end latency, oldest record in a vehicle-state batch (maximum) & 8.2\,s \\
+End-to-end latency, zone by hour windows (average) & 5.3\,s \\
+Micro-batch duration: vehicle state and zone by hour (average) & 2.0\,s and 4.9\,s \\
+Largest Kafka lag of any streaming query & 0 offsets \\
+Spark batch job for one simulated day (average) & 20\,s \\
+\midrule
+\multicolumn{2}{@{}p{\dimexpr\textwidth\relax}@{}}{\raggedright\textbf{Batch job steps (average):} spark start 4\,s, validate expenses 1\,s, clean telemetry 8\,s, join and profitability 3\,s, write curated parquet 3\,s, publish postgres 1\,s} \\
+\multicolumn{2}{@{}p{\dimexpr\textwidth\relax}@{}}{\raggedright\textbf{Memory per container:} airflow 438, alertmanager 43, api 41, batch-producer 10, grafana 232, kafka 77, postgres 64, prometheus 132, spark-streaming 786, statsd-exporter 36, stream-producer 37 (MiB, total 1.9\,GiB)} \\
+\bottomrule
+\end{tabularx}
+\end{table}

@@ -1,0 +1,12 @@
+This report describes FleetPulse, a small but complete data platform for a ride-hailing company in
+Colombo. The platform answers two business questions. How busy is the fleet, and how much does it earn
+in each area right now? Which vehicles are becoming unprofitable once yesterday's fuel and maintenance
+costs are added? We chose a Lambda architecture. The speed layer uses Apache Kafka and Spark Structured
+Streaming and shows live numbers a few seconds after an event happens. The batch layer is started by
+Apache Airflow once per simulated day. It recomputes the whole day from raw data with Spark and joins it
+with the cost file from our fuel and garage partners. All results are stored in PostgreSQL and served by a
+FastAPI service, three Grafana dashboards and a daily HTML report. Structured logs, Prometheus metrics and
+14 alert rules make every stage observable. The whole system starts with one Docker Compose command on a
+laptop. In our test run of \NumDays{} simulated days, the speed layer kept the end-to-end latency near
+\LatencyAvg{} seconds, and the batch layer found every loss-making vehicle and explained why, including one
+vehicle whose profit fell day after day.

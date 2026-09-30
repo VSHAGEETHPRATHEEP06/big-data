@@ -1,0 +1,58 @@
+\section{Technology stack and justification}
+Table~\ref{tab:stack} lists every major tool, why it fits this use case and what we compared it with. We
+chose each tool for a need of the fleet problem, not because it is popular. All versions are the current
+stable releases in September 2026 \cite{spark,kafka,airflow}.
+
+\begin{table}[!htb]
+\centering\small
+\caption{Technology stack.}
+\label{tab:stack}
+\begin{tabularx}{\textwidth}{@{}P{1.9cm} P{2.5cm} L P{2.8cm}@{}}
+\toprule
+\textbf{Layer} & \textbf{Choice} & \textbf{Why it fits our use case} & \textbf{Compared with} \\
+\midrule
+Ingestion & Apache Kafka 4.3 (KRaft, native image) &
+A durable, ordered log. Keys keep each vehicle's events in order, and consumers can re-read by offset after
+a failure, so either side can restart without losing data. KRaft needs no ZooKeeper. &
+RabbitMQ (no replay by offset), Redpanda \\
+Stream processing & Apache Spark 4.1 Structured Streaming &
+Event-time windows and watermarks for late GPS data, de-duplication, stream-static joins and checkpoints
+for exactly-once processing. The same API runs the batch layer. &
+Apache Storm (no batch API, harder state handling) \\
+Batch processing & Apache Spark 4.1 (batch) &
+Recomputes a day from Parquet with window functions (time in each status, idle streaks) and joins the cost
+file, with the module shared with the speed layer. &
+Plain SQL in PostgreSQL (raw events would fill the serving store) \\
+Orchestration & Apache Airflow 3.3 &
+Sensors wait for the file, tasks retry, failures raise an alert, and any day can be rerun with one
+parameter. The web UI shows every run. &
+cron (no dependencies, retries or run history) \\
+Master dataset & Parquet files on a Docker volume &
+Columnar, compressed and partitioned by day, so it is cheap to keep forever. In production the same layout
+would sit on S3 or HDFS. &
+Keeping all history in Kafka \\
+Serving store & PostgreSQL 17 &
+Results are small (hundreds of rows a day). We need joins for the merge views, upserts for streaming updates
+and transactions to publish a whole day at once. &
+Cassandra (no joins or multi-row transactions) \\
+Serving & FastAPI, Grafana 12, HTML report &
+A documented REST API with \code{/metrics}, live dashboards on PostgreSQL and Prometheus, and a report that
+is easy to email to managers. &
+Streamlit \\
+Observability & Prometheus 3, Alertmanager, StatsD exporter, JSON logs &
+Metrics from every stage and alert rules. Alertmanager groups and routes alerts, and StatsD brings in the
+Airflow metrics. &
+Loki and Jaeger (too much memory for our laptop) \\
+Deployment & Docker Compose &
+One command starts 13 services (11 long-running and 2 set-up jobs) with health checks and memory limits. &
+Kubernetes (too heavy for one laptop) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Designing for an 8 GB laptop.} Our computer has 8\,GB of memory and Docker gets only about
+3.8\,GB. This constraint shaped some choices. We run the three Airflow components in one container with the
+LocalExecutor instead of the official set-up with Celery and Redis. Kafka uses the official GraalVM
+\emph{native} image, which needed less than 150\,MB in our run instead of about 350\,MB for the Java image. Both Spark jobs
+run in local mode with a 512\,MB heap and use only the fast C1 compiler of the Java virtual machine. Without
+these changes, the system swapped memory and one batch run took eight minutes.

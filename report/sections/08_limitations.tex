@@ -1,0 +1,43 @@
+\section{Limitations, trade-offs and production changes}
+
+\subsection{Limitations}
+\begin{itemize}
+\item \textbf{Single nodes.} Kafka has one broker with replication factor 1, and Spark runs in local mode. A
+broker failure would stop ingestion, and one machine limits the throughput.
+\item \textbf{Simple model.} Vehicles move in straight lines, and zones are nearest-centre areas on a coarse
+grid, so a point near a zone border can fall in the wrong zone.
+\item \textbf{Estimated lateness.} The batch layer counts an event as late when it arrived more than
+10 simulated minutes after it happened. This is close to, but not exactly, what the speed layer dropped.
+\item \textbf{Light tracing and local security.} We trace with ids and lineage tables instead of OpenTelemetry
+and Jaeger. Passwords are in an \code{.env} file, and Kafka and PostgreSQL use no TLS.
+\item \textbf{Limited memory.} The full stack needs most of the memory that Docker can use on an 8\,GB
+laptop, so heavy desktop apps make the batch runs slower.
+\end{itemize}
+
+\subsection{Trade-offs we accepted}
+\begin{itemize}
+\item \textbf{Two code paths} give exact money numbers and cheap recomputing. Shared code and a parity test
+reduce the risk that they drift apart.
+\item \textbf{A 10-second trigger} for the aggregate queries instead of 5 seconds halves the CPU they use.
+\item \textbf{A 10-minute watermark} keeps state small and dashboards fresh, but the speed layer drops some
+late events. The batch layer counts them after midnight.
+\item \textbf{Collecting to the driver.} The \code{vehicle\_state} query collects each small micro-batch
+(about 100 rows) to the Spark driver. This is much faster than several Spark jobs per batch, and the input
+cap of 5000 offsets per trigger keeps it safe.
+\item \textbf{Kafka native image.} It saves memory, but Apache says it is for development and testing. The
+Java image is a drop-in replacement.
+\end{itemize}
+
+\subsection{What we would change at production scale}
+\begin{itemize}
+\item \textbf{Kafka:} a cluster of at least three brokers with replication factor 3, and a schema registry
+with Avro or Protobuf schemas for the events.
+\item \textbf{Spark:} a cluster (Kubernetes or a managed service) with more partitions and the RocksDB state
+store for large state.
+\item \textbf{Master dataset:} S3 or HDFS with an open table format such as Delta Lake or Apache Iceberg,
+and regular compaction of the small files that streaming creates.
+\item \textbf{Airflow:} the Kubernetes or Celery executor, with Spark batch jobs started on the cluster.
+\item \textbf{Zones:} a real geo index, for example H3 cells or zone polygons.
+\item \textbf{Operations:} central logs (Loki or Elasticsearch), OpenTelemetry tracing, alerts by e-mail,
+SMS or Slack, a secret manager and TLS everywhere.
+\end{itemize}

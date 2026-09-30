@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FleetPulse daily report 2026-09-09</title>
+<style>
+  :root { --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; --bg:#f8fafc; --red:#b91c1c; --amber:#b45309; --green:#15803d; --grey:#475569; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: "Segoe UI", system-ui, -apple-system, Helvetica, Arial, sans-serif; color:var(--ink); background:var(--bg); font-size:13px; line-height:1.45; }
+  .page { max-width:1180px; margin:0 auto; padding:24px 20px 40px; }
+  header { background:#0f172a; color:#fff; border-radius:12px; padding:18px 22px; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  header h1 { margin:0; font-size:22px; }
+  header .sub { color:#cbd5e1; margin-top:4px; }
+  header .meta { text-align:right; color:#cbd5e1; font-size:12px; }
+  .kpis { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin:16px 0 12px; }
+  .kpi { background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  .kpi .label { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+  .kpi .value { font-size:20px; font-weight:700; margin-top:2px; }
+  .kpi .note { color:var(--muted); font-size:11px; }
+  .pills { display:flex; gap:8px; flex-wrap:wrap; }
+  .pill { border-radius:999px; padding:4px 12px; font-weight:600; font-size:12px; }
+  section { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-top:16px; }
+  h2 { font-size:16px; margin:0 0 2px; }
+  .hint { color:var(--muted); margin:0 0 10px; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th, td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+  th { background:#f1f5f9; font-weight:600; color:#334155; }
+  .n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .badge { display:inline-block; border-radius:6px; padding:2px 6px; font-size:11px; font-weight:700; white-space:nowrap; }
+  .UNPROFITABLE { background:#fee2e2; color:var(--red); }
+  .AT_RISK { background:#fef3c7; color:var(--amber); }
+  .PROFITABLE { background:#dcfce7; color:var(--green); }
+  .NO_COST_DATA { background:#e2e8f0; color:var(--grey); }
+  .flag { background:#fde68a; color:#78350f; }
+  .neg { color:var(--red); font-weight:600; }
+  table.heat td, table.heat th { text-align:center; padding:4px 2px; font-size:11px; border:1px solid #fff; }
+  table.heat td.zone, table.heat th.zone { text-align:left; padding-left:6px; white-space:nowrap; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  ul.reasons { margin:0; padding-left:16px; }
+  dl { display:grid; grid-template-columns:auto 1fr; gap:4px 12px; margin:0; }
+  dt { color:var(--muted); }
+  dd { margin:0; font-variant-numeric:tabular-nums; }
+  code { font-size:11px; background:#f1f5f9; padding:1px 4px; border-radius:4px; }
+  footer { color:var(--muted); font-size:11px; margin-top:16px; }
+  @media print { body { background:#fff; } section, .kpi, tr { break-inside:avoid; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div>
+    <h1>FleetPulse daily fleet report</h1>
+    <div class="sub">Wednesday 09 September 2026 (simulated day). Colombo ride-hailing fleet. Exact batch-layer results.</div>
+  </div>
+  <div class="meta">
+    Airflow run <code style="background:#1e293b;color:#e2e8f0">recompute__2026-09-09</code><br>
+    Generated 2026-09-30 11:14 UTC
+  </div>
+</header>
+
+<div class="kpis">
+  <div class="kpi"><div class="label">Trips completed</div><div class="value">447</div><div class="note">30 vehicles worked today</div></div>
+  <div class="kpi"><div class="label">Fares earned</div><div class="value">LKR 443,783</div><div class="note">driver share 30%: LKR 133,135</div></div>
+  <div class="kpi"><div class="label">Fuel and maintenance</div><div class="value">LKR 197,836</div><div class="note">fuel 62,808, maintenance 135,029</div></div>
+  <div class="kpi"><div class="label">Fleet net profit</div><div class="value ">LKR 112,812</div><div class="note">fleet utilization 38.6% of online time</div></div>
+</div>
+
+<div class="pills">
+  <span class="pill UNPROFITABLE">6 unprofitable</span>
+  <span class="pill AT_RISK">1 at risk (margin below 15%)</span>
+  <span class="pill flag">0 becoming unprofitable</span>
+  <span class="pill NO_COST_DATA">0 without partner costs</span>
+  <span class="pill NO_COST_DATA">19 idle episodes over 90 min</span>
+</div>
+
+<section>
+  <h2>1. Vehicles that need attention</h2>
+  <p class="hint">Vehicles that lose money or keep a margin below 15% once the day's fuel and maintenance costs are applied, and vehicles whose reported kilometres do not match GPS. "Becoming unprofitable" means profit fell for two days in a row, or the vehicle was profitable yesterday and loses money today. Days with a garage service bill are not counted.</p>
+  
+  <table>
+    <tr><th>Vehicle</th><th>Type</th><th class="n">Trips</th><th class="n">Fares</th><th class="n">Fuel</th><th class="n">Maint.</th><th class="n">Net profit</th><th class="n">Yesterday</th><th>Trend</th><th>Status</th><th>Why</th></tr>
+    
+    <tr>
+      <td><b>V007</b><br><span style="color:#64748b">WP CAD-6621</span></td>
+      <td>mini</td>
+      <td class="n">1</td>
+      <td class="n">1,218</td>
+      <td class="n">335</td>
+      <td class="n">11,359</td>
+      <td class="n neg">-10,842</td>
+      <td class="n">-22,536</td>
+      <td>stable</td>
+      <td><span class="badge UNPROFITABLE">UNPROFITABLE</span></td>
+      <td><ul class="reasons"><li>low trips: 1 vs type median 15</li><li>high fuel cost: LKR 43.5/km vs type average 21.1</li><li>idle 90% of online time</li></ul></td>
+    </tr>
+    
+    <tr>
+      <td><b>V027</b><br><span style="color:#64748b">WP CAL-8823</span></td>
+      <td>mini</td>
+      <td class="n">12</td>
+      <td class="n">13,553</td>
+      <td class="n">1,741</td>
+      <td class="n">13,750</td>
+      <td class="n neg">-6,003</td>
+      <td class="n">2,590</td>
+      <td>stable</td>
+      <td><span class="badge UNPROFITABLE">UNPROFITABLE</span></td>
+      <td><ul class="reasons"><li>service day: maintenance LKR 13,750</li><li>idle 66% of online time</li></ul></td>
+    </tr>
+    
+    <tr>
+      <td><b>V014</b><br><span style="color:#64748b">WP CAF-4403</span></td>
+      <td>mini</td>
+      <td class="n">18</td>
+      <td class="n">20,009</td>
+      <td class="n">2,774</td>
+      <td class="n">16,389</td>
+      <td class="n neg">-5,156</td>
+      <td class="n">9,379</td>
+      <td>stable</td>
+      <td><span class="badge UNPROFITABLE">UNPROFITABLE</span></td>
+      <td><ul class="reasons"><li>service day: maintenance LKR 16,389</li><li>idle 54% of online time</li></ul></td>
+    </tr>
+    
+    <tr>
+      <td><b>V021</b><br><span style="color:#64748b">WP QG-2264</span></td>
+      <td>tuk</td>
+      <td class="n">10</td>
+      <td class="n">5,788</td>
+      <td class="n">725</td>
+      <td class="n">7,918</td>
+      <td class="n neg">-4,591</td>
+      <td class="n">2,210</td>
+      <td>stable</td>
+      <td><span class="badge UNPROFITABLE">UNPROFITABLE</span></td>
+      <td><ul class="reasons"><li>service day: maintenance LKR 7,918</li><li>idle 71% of online time</li></ul></td>
+    </tr>
+    
+    <tr>
+      <td><b>V026</b><br><span style="color:#64748b">WP CAL-7719</span></td>
+      <td>car</td>
+      <td class="n">15</td>
+      <td class="n">23,218</td>
+      <td class="n">4,569</td>
+      <td class="n">15,978</td>
+      <td class="n neg">-4,294</td>
+      <td class="n">7,427</td>
+      <td>falling</td>
+      <td><span class="badge UNPROFITABLE">UNPROFITABLE</span></td>
+      <td><ul class="reasons"><li>service day: maintenance LKR 15,978</li><li>high fuel cost: LKR 32.8/km vs type average 25.0</li><li>reported km differ from GPS by 35.9%</li><li>idle 58% of online time</li></ul></td>
+    </tr>
+    
+    <tr>
+      <td><b>V009</b><br><span style="color:#64748b">WP QD-8821</span></td>
+      <td>tuk</td>
+      <td class="n">16</td>
+      <td class="n">12,899</td>
+      <td class="n">1,533</td>
+      <td class="n">8,447</td>
+      <td class="n neg">-950</td>
+      <td class="n">6,080</td>
+      <td>stable</td>
+      <td><span class="badge UNPROFITABLE">UNPROFITABLE</span></td>
+      <td><ul class="reasons"><li>service day: maintenance LKR 8,447</li></ul></td>
+    </tr>
+    
+    <tr>
+      <td><b>V025</b><br><span style="color:#64748b">WP QH-6605</span></td>
+      <td>tuk</td>
+      <td class="n">20</td>
+      <td class="n">12,350</td>
+      <td class="n">1,642</td>
+      <td class="n">5,905</td>
+      <td class="n ">1,097</td>
+      <td class="n">5,750</td>
+      <td>falling</td>
+      <td><span class="badge AT_RISK">AT RISK</span></td>
+      <td><ul class="reasons"><li>service day: maintenance LKR 5,905</li><li>idle 40% of online time</li></ul></td>
+    </tr>
+    
+  </table>
+  
+</section>
+
+<section>
+  <h2>2. Profitability of every vehicle</h2>
+  <p class="hint">Net profit = fares - driver share (30%) - fuel - maintenance. Distance gap compares partner-reported kilometres with GPS kilometres.</p>
+  <table>
+    <tr><th>Vehicle</th><th>Type</th><th class="n">Trips</th><th class="n">Fares</th><th class="n">Costs</th><th class="n">Net profit</th><th class="n">Margin</th><th class="n">GPS km</th><th class="n">Gap</th><th class="n">Busy</th><th>Status</th></tr>
+    
+    <tr>
+      <td>V007</td><td>mini</td>
+      <td class="n">1</td>
+      <td class="n">1,218</td>
+      <td class="n">11,695</td>
+      <td class="n neg">-10,842</td>
+      <td class="n">-890%</td>
+      <td class="n">7.7</td>
+      <td class="n">0.8%</td>
+      <td class="n">9%</td>
+      <td><span class="badge UNPROFITABLE">UNPROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V027</td><td>mini</td>
+      <td class="n">12</td>
+      <td class="n">13,553</td>
+      <td class="n">15,490</td>
+      <td class="n neg">-6,003</td>
+      <td class="n">-44%</td>
+      <td class="n">92.9</td>
+      <td class="n">-0.5%</td>
+      <td class="n">29%</td>
+      <td><span class="badge UNPROFITABLE">UNPROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V014</td><td>mini</td>
+      <td class="n">18</td>
+      <td class="n">20,009</td>
+      <td class="n">19,163</td>
+      <td class="n neg">-5,156</td>
+      <td class="n">-26%</td>
+      <td class="n">149.1</td>
+      <td class="n">1.1%</td>
+      <td class="n">40%</td>
+      <td><span class="badge UNPROFITABLE">UNPROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V021</td><td>tuk</td>
+      <td class="n">10</td>
+      <td class="n">5,788</td>
+      <td class="n">8,642</td>
+      <td class="n neg">-4,591</td>
+      <td class="n">-79%</td>
+      <td class="n">64.6</td>
+      <td class="n">0.2%</td>
+      <td class="n">23%</td>
+      <td><span class="badge UNPROFITABLE">UNPROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V026</td><td>car</td>
+      <td class="n">15</td>
+      <td class="n">23,218</td>
+      <td class="n">20,547</td>
+      <td class="n neg">-4,294</td>
+      <td class="n">-18%</td>
+      <td class="n">139.4</td>
+      <td class="n">35.9%</td>
+      <td class="n">38%</td>
+      <td><span class="badge UNPROFITABLE">UNPROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V009</td><td>tuk</td>
+      <td class="n">16</td>
+      <td class="n">12,899</td>
+      <td class="n">9,980</td>
+      <td class="n neg">-950</td>
+      <td class="n">-7%</td>
+      <td class="n">145.0</td>
+      <td class="n">-4.0%</td>
+      <td class="n">51%</td>
+      <td><span class="badge UNPROFITABLE">UNPROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V025</td><td>tuk</td>
+      <td class="n">20</td>
+      <td class="n">12,350</td>
+      <td class="n">7,548</td>
+      <td class="n ">1,097</td>
+      <td class="n">9%</td>
+      <td class="n">143.9</td>
+      <td class="n">-1.5%</td>
+      <td class="n">49%</td>
+      <td><span class="badge AT_RISK">AT RISK</span></td>
+    </tr>
+    
+    <tr>
+      <td>V030</td><td>mini</td>
+      <td class="n">6</td>
+      <td class="n">6,961</td>
+      <td class="n">3,196</td>
+      <td class="n ">1,676</td>
+      <td class="n">24%</td>
+      <td class="n">52.9</td>
+      <td class="n">-0.2%</td>
+      <td class="n">14%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V019</td><td>tuk</td>
+      <td class="n">11</td>
+      <td class="n">7,447</td>
+      <td class="n">2,187</td>
+      <td class="n ">3,025</td>
+      <td class="n">41%</td>
+      <td class="n">85.7</td>
+      <td class="n">2.2%</td>
+      <td class="n">24%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V013</td><td>car</td>
+      <td class="n">14</td>
+      <td class="n">18,677</td>
+      <td class="n">9,015</td>
+      <td class="n ">4,059</td>
+      <td class="n">22%</td>
+      <td class="n">121.7</td>
+      <td class="n">1.5%</td>
+      <td class="n">27%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V028</td><td>car</td>
+      <td class="n">11</td>
+      <td class="n">14,710</td>
+      <td class="n">5,991</td>
+      <td class="n ">4,306</td>
+      <td class="n">29%</td>
+      <td class="n">97.7</td>
+      <td class="n">-1.1%</td>
+      <td class="n">27%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V006</td><td>tuk</td>
+      <td class="n">11</td>
+      <td class="n">9,487</td>
+      <td class="n">2,304</td>
+      <td class="n ">4,337</td>
+      <td class="n">46%</td>
+      <td class="n">101.6</td>
+      <td class="n">0.9%</td>
+      <td class="n">46%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V008</td><td>tuk</td>
+      <td class="n">16</td>
+      <td class="n">9,984</td>
+      <td class="n">2,559</td>
+      <td class="n ">4,430</td>
+      <td class="n">44%</td>
+      <td class="n">123.4</td>
+      <td class="n">2.9%</td>
+      <td class="n">41%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V001</td><td>tuk</td>
+      <td class="n">13</td>
+      <td class="n">10,053</td>
+      <td class="n">2,497</td>
+      <td class="n ">4,540</td>
+      <td class="n">45%</td>
+      <td class="n">115.4</td>
+      <td class="n">0.5%</td>
+      <td class="n">41%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V004</td><td>tuk</td>
+      <td class="n">16</td>
+      <td class="n">11,027</td>
+      <td class="n">2,937</td>
+      <td class="n ">4,782</td>
+      <td class="n">43%</td>
+      <td class="n">140.9</td>
+      <td class="n">2.4%</td>
+      <td class="n">40%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V017</td><td>mini</td>
+      <td class="n">12</td>
+      <td class="n">13,272</td>
+      <td class="n">4,440</td>
+      <td class="n ">4,851</td>
+      <td class="n">37%</td>
+      <td class="n">109.7</td>
+      <td class="n">-1.4%</td>
+      <td class="n">32%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V005</td><td>tuk</td>
+      <td class="n">20</td>
+      <td class="n">11,554</td>
+      <td class="n">2,916</td>
+      <td class="n ">5,172</td>
+      <td class="n">45%</td>
+      <td class="n">135.3</td>
+      <td class="n">0.9%</td>
+      <td class="n">42%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V003</td><td>tuk</td>
+      <td class="n">16</td>
+      <td class="n">12,577</td>
+      <td class="n">2,984</td>
+      <td class="n ">5,820</td>
+      <td class="n">46%</td>
+      <td class="n">151.1</td>
+      <td class="n">2.3%</td>
+      <td class="n">52%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V029</td><td>tuk</td>
+      <td class="n">17</td>
+      <td class="n">12,261</td>
+      <td class="n">2,621</td>
+      <td class="n ">5,961</td>
+      <td class="n">49%</td>
+      <td class="n">140.3</td>
+      <td class="n">0.0%</td>
+      <td class="n">48%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V002</td><td>tuk</td>
+      <td class="n">17</td>
+      <td class="n">13,417</td>
+      <td class="n">2,974</td>
+      <td class="n ">6,418</td>
+      <td class="n">48%</td>
+      <td class="n">142.0</td>
+      <td class="n">3.2%</td>
+      <td class="n">56%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V022</td><td>car</td>
+      <td class="n">13</td>
+      <td class="n">18,835</td>
+      <td class="n">6,696</td>
+      <td class="n ">6,488</td>
+      <td class="n">34%</td>
+      <td class="n">112.1</td>
+      <td class="n">2.1%</td>
+      <td class="n">26%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V010</td><td>tuk</td>
+      <td class="n">23</td>
+      <td class="n">14,454</td>
+      <td class="n">3,235</td>
+      <td class="n ">6,882</td>
+      <td class="n">48%</td>
+      <td class="n">173.2</td>
+      <td class="n">3.2%</td>
+      <td class="n">49%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V011</td><td>mini</td>
+      <td class="n">15</td>
+      <td class="n">17,542</td>
+      <td class="n">4,766</td>
+      <td class="n ">7,514</td>
+      <td class="n">43%</td>
+      <td class="n">133.6</td>
+      <td class="n">0.8%</td>
+      <td class="n">37%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V015</td><td>mini</td>
+      <td class="n">17</td>
+      <td class="n">18,129</td>
+      <td class="n">5,163</td>
+      <td class="n ">7,527</td>
+      <td class="n">42%</td>
+      <td class="n">142.9</td>
+      <td class="n">1.8%</td>
+      <td class="n">38%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V012</td><td>mini</td>
+      <td class="n">18</td>
+      <td class="n">19,993</td>
+      <td class="n">5,976</td>
+      <td class="n ">8,019</td>
+      <td class="n">40%</td>
+      <td class="n">147.8</td>
+      <td class="n">-4.3%</td>
+      <td class="n">44%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V020</td><td>mini</td>
+      <td class="n">19</td>
+      <td class="n">21,204</td>
+      <td class="n">6,424</td>
+      <td class="n ">8,419</td>
+      <td class="n">40%</td>
+      <td class="n">170.5</td>
+      <td class="n">2.5%</td>
+      <td class="n">44%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V024</td><td>car</td>
+      <td class="n">16</td>
+      <td class="n">22,510</td>
+      <td class="n">7,073</td>
+      <td class="n ">8,684</td>
+      <td class="n">39%</td>
+      <td class="n">150.5</td>
+      <td class="n">-1.3%</td>
+      <td class="n">34%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V018</td><td>car</td>
+      <td class="n">17</td>
+      <td class="n">22,018</td>
+      <td class="n">6,030</td>
+      <td class="n ">9,382</td>
+      <td class="n">43%</td>
+      <td class="n">127.7</td>
+      <td class="n">-1.4%</td>
+      <td class="n">34%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V016</td><td>car</td>
+      <td class="n">16</td>
+      <td class="n">24,197</td>
+      <td class="n">6,682</td>
+      <td class="n ">10,256</td>
+      <td class="n">42%</td>
+      <td class="n">137.0</td>
+      <td class="n">1.3%</td>
+      <td class="n">40%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+    <tr>
+      <td>V023</td><td>mini</td>
+      <td class="n">21</td>
+      <td class="n">24,439</td>
+      <td class="n">6,106</td>
+      <td class="n ">11,001</td>
+      <td class="n">45%</td>
+      <td class="n">185.0</td>
+      <td class="n">0.5%</td>
+      <td class="n">52%</td>
+      <td><span class="badge PROFITABLE">PROFITABLE</span></td>
+    </tr>
+    
+  </table>
+</section>
+
+<section>
+  <h2>3. Earnings by zone and hour of day</h2>
+  <p class="hint">Fares in thousand LKR by pickup zone and the hour the trip ended. Darker cells earn more.</p>
+  <table class="heat">
+    <tr><th class="zone">Zone</th><th>00</th><th>01</th><th>02</th><th>03</th><th>04</th><th>05</th><th>06</th><th>07</th><th>08</th><th>09</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th><th>17</th><th>18</th><th>19</th><th>20</th><th>21</th><th>22</th><th>23</th><th>Total</th><th>Trips</th></tr>
+    
+    <tr>
+      <td class="zone">Fort-Pettah</td>
+      <td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(181, 217, 213);color:#0f172a">2.4</td><td style="background:rgb(164, 207, 203);color:#0f172a">3.1</td><td style="background:rgb(192, 224, 220);color:#0f172a">2.0</td><td style="background:rgb(115, 178, 172);color:#ffffff">5.2</td><td style="background:rgb(145, 196, 191);color:#0f172a">3.9</td><td style="background:rgb(156, 203, 198);color:#0f172a">3.5</td><td style="background:rgb(202, 230, 226);color:#0f172a">1.6</td><td style="background:rgb(126, 185, 179);color:#0f172a">4.7</td><td style="background:rgb(169, 210, 206);color:#0f172a">2.9</td><td style="background:rgb(141, 194, 188);color:#0f172a">4.1</td><td style="background:rgb(15, 118, 110);color:#ffffff">9.2</td><td style="background:rgb(148, 198, 193);color:#0f172a">3.8</td><td style="background:rgb(156, 203, 198);color:#0f172a">3.5</td><td style="background:rgb(232, 248, 245);color:#0f172a">0.3</td><td style="background:rgb(185, 220, 216);color:#0f172a">2.3</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(185, 220, 216);color:#0f172a">2.3</td>
+      <td><b>54.7</b></td><td>55</td>
+    </tr>
+    
+    <tr>
+      <td class="zone">Wellawatte</td>
+      <td style="background:rgb(207, 233, 229);color:#0f172a">1.4</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(151, 200, 195);color:#0f172a">3.7</td><td style="background:rgb(101, 170, 163);color:#ffffff">5.7</td><td style="background:rgb(207, 233, 230);color:#0f172a">1.3</td><td style="background:rgb(205, 232, 228);color:#0f172a">1.5</td><td style="background:rgb(224, 244, 240);color:#0f172a">0.6</td><td style="background:rgb(210, 235, 231);color:#0f172a">1.2</td><td style="background:rgb(165, 208, 203);color:#0f172a">3.1</td><td style="background:rgb(174, 213, 209);color:#0f172a">2.7</td><td style="background:rgb(164, 208, 203);color:#0f172a">3.1</td><td style="background:rgb(129, 187, 181);color:#0f172a">4.6</td><td style="background:rgb(212, 236, 232);color:#0f172a">1.2</td><td style="background:rgb(170, 211, 206);color:#0f172a">2.9</td><td style="background:rgb(168, 210, 205);color:#0f172a">3.0</td><td style="background:rgb(179, 216, 212);color:#0f172a">2.5</td><td style="background:rgb(174, 213, 209);color:#0f172a">2.7</td><td style="background:rgb(199, 228, 224);color:#0f172a">1.7</td><td style="background:rgb(204, 232, 228);color:#0f172a">1.5</td><td style="background:#ffffff;color:#94a3b8"></td>
+      <td><b>44.3</b></td><td>49</td>
+    </tr>
+    
+    <tr>
+      <td class="zone">Maradana</td>
+      <td style="background:rgb(232, 248, 245);color:#0f172a">0.3</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(223, 243, 240);color:#0f172a">0.7</td><td style="background:rgb(182, 218, 214);color:#0f172a">2.4</td><td style="background:rgb(165, 208, 203);color:#0f172a">3.1</td><td style="background:rgb(187, 221, 217);color:#0f172a">2.2</td><td style="background:rgb(221, 242, 238);color:#0f172a">0.8</td><td style="background:rgb(188, 222, 218);color:#0f172a">2.1</td><td style="background:rgb(153, 201, 196);color:#0f172a">3.6</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(151, 200, 195);color:#0f172a">3.7</td><td style="background:rgb(141, 194, 188);color:#0f172a">4.1</td><td style="background:rgb(148, 198, 193);color:#0f172a">3.8</td><td style="background:rgb(188, 222, 218);color:#0f172a">2.1</td><td style="background:rgb(172, 212, 207);color:#0f172a">2.8</td><td style="background:rgb(164, 207, 203);color:#0f172a">3.1</td><td style="background:rgb(140, 193, 188);color:#0f172a">4.1</td><td style="background:rgb(200, 229, 225);color:#0f172a">1.6</td><td style="background:rgb(196, 227, 223);color:#0f172a">1.8</td><td style="background:#ffffff;color:#94a3b8"></td>
+      <td><b>42.3</b></td><td>48</td>
+    </tr>
+    
+    <tr>
+      <td class="zone">Kollupitiya</td>
+      <td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(210, 235, 231);color:#0f172a">1.3</td><td style="background:rgb(209, 235, 231);color:#0f172a">1.3</td><td style="background:rgb(121, 182, 176);color:#0f172a">4.9</td><td style="background:rgb(145, 196, 191);color:#0f172a">3.9</td><td style="background:rgb(140, 193, 188);color:#0f172a">4.1</td><td style="background:rgb(192, 224, 220);color:#0f172a">2.0</td><td style="background:rgb(170, 211, 207);color:#0f172a">2.9</td><td style="background:rgb(162, 206, 202);color:#0f172a">3.2</td><td style="background:rgb(97, 167, 161);color:#ffffff">5.9</td><td style="background:rgb(153, 201, 196);color:#0f172a">3.6</td><td style="background:rgb(195, 226, 222);color:#0f172a">1.9</td><td style="background:rgb(221, 242, 238);color:#0f172a">0.8</td><td style="background:rgb(186, 220, 216);color:#0f172a">2.2</td><td style="background:rgb(187, 221, 217);color:#0f172a">2.2</td><td style="background:rgb(201, 230, 226);color:#0f172a">1.6</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td>
+      <td><b>41.6</b></td><td>37</td>
+    </tr>
+    
+    <tr>
+      <td class="zone">Kotahena</td>
+      <td style="background:rgb(230, 247, 244);color:#0f172a">0.4</td><td style="background:rgb(210, 235, 231);color:#0f172a">1.2</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(185, 220, 216);color:#0f172a">2.3</td><td style="background:rgb(168, 210, 205);color:#0f172a">3.0</td><td style="background:rgb(146, 196, 191);color:#0f172a">3.9</td><td style="background:rgb(206, 233, 229);color:#0f172a">1.4</td><td style="background:rgb(159, 204, 199);color:#0f172a">3.4</td><td style="background:rgb(207, 233, 229);color:#0f172a">1.4</td><td style="background:rgb(141, 194, 188);color:#0f172a">4.1</td><td style="background:rgb(219, 241, 237);color:#0f172a">0.8</td><td style="background:rgb(206, 233, 229);color:#0f172a">1.4</td><td style="background:rgb(202, 230, 226);color:#0f172a">1.6</td><td style="background:rgb(66, 149, 142);color:#ffffff">7.2</td><td style="background:rgb(210, 235, 231);color:#0f172a">1.2</td><td style="background:rgb(176, 215, 210);color:#0f172a">2.6</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(197, 227, 223);color:#0f172a">1.8</td><td style="background:rgb(207, 233, 230);color:#0f172a">1.3</td><td style="background:#ffffff;color:#94a3b8"></td>
+      <td><b>38.9</b></td><td>37</td>
+    </tr>
+    
+    <tr>
+      <td class="zone">Bambalapitiya</td>
+      <td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(208, 234, 230);color:#0f172a">1.3</td><td style="background:rgb(213, 237, 233);color:#0f172a">1.1</td><td style="background:rgb(174, 214, 209);color:#0f172a">2.7</td><td style="background:rgb(180, 217, 213);color:#0f172a">2.5</td><td style="background:rgb(227, 245, 242);color:#0f172a">0.5</td><td style="background:rgb(139, 193, 187);color:#0f172a">4.1</td><td style="background:rgb(193, 225, 221);color:#0f172a">1.9</td><td style="background:rgb(131, 188, 182);color:#0f172a">4.5</td><td style="background:rgb(144, 196, 191);color:#0f172a">3.9</td><td style="background:rgb(171, 212, 207);color:#0f172a">2.8</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(186, 221, 217);color:#0f172a">2.2</td><td style="background:rgb(171, 212, 207);color:#0f172a">2.8</td><td style="background:rgb(119, 180, 175);color:#0f172a">5.0</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(187, 221, 217);color:#0f172a">2.2</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(227, 245, 242);color:#0f172a">0.5</td>
+      <td><b>38.1</b></td><td>40</td>
+    </tr>
+    
+    <tr>
+      <td class="zone">Nugegoda</td>
+      <td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(198, 228, 224);color:#0f172a">1.7</td><td style="background:rgb(175, 214, 210);color:#0f172a">2.7</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(224, 243, 240);color:#0f172a">0.7</td><td style="background:rgb(198, 228, 224);color:#0f172a">1.7</td><td style="background:rgb(186, 221, 217);color:#0f172a">2.2</td><td style="background:rgb(186, 221, 217);color:#0f172a">2.2</td><td style="background:rgb(184, 219, 215);color:#0f172a">2.3</td><td style="background:rgb(217, 239, 236);color:#0f172a">0.9</td><td style="background:rgb(109, 174, 169);color:#ffffff">5.4</td><td style="background:rgb(117, 179, 173);color:#0f172a">5.1</td><td style="background:rgb(72, 152, 146);color:#ffffff">6.9</td><td style="background:rgb(220, 241, 237);color:#0f172a">0.8</td><td style="background:rgb(212, 236, 232);color:#0f172a">1.2</td><td style="background:rgb(228, 246, 242);color:#0f172a">0.5</td><td style="background:rgb(216, 238, 235);color:#0f172a">1.0</td><td style="background:rgb(222, 242, 239);color:#0f172a">0.7</td><td style="background:rgb(213, 237, 233);color:#0f172a">1.1</td>
+      <td><b>37.2</b></td><td>38</td>
+    </tr>
+    
+    <tr>
+      <td class="zone">Cinnamon Gardens</td>
+      <td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(229, 246, 243);color:#0f172a">0.5</td><td style="background:rgb(188, 222, 217);color:#0f172a">2.2</td><td style="background:rgb(202, 230, 226);color:#0f172a">1.6</td><td style="background:rgb(109, 174, 168);color:#ffffff">5.4</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(172, 212, 208);color:#0f172a">2.8</td><td style="background:rgb(168, 210, 205);color:#0f172a">3.0</td><td style="background:rgb(212, 236, 233);color:#0f172a">1.1</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(134, 189, 184);color:#0f172a">4.4</td><td style="background:rgb(133, 189, 183);color:#0f172a">4.4</td><td style="background:rgb(157, 203, 198);color:#0f172a">3.4</td><td style="background:rgb(149, 199, 194);color:#0f172a">3.7</td><td style="background:rgb(202, 230, 227);color:#0f172a">1.5</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(226, 244, 241);color:#0f172a">0.6</td><td style="background:#ffffff;color:#94a3b8"></td>
+      <td><b>34.5</b></td><td>33</td>
+    </tr>
+    
+    <tr>
+      <td class="zone">Borella</td>
+      <td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(224, 243, 240);color:#0f172a">0.7</td><td style="background:rgb(223, 243, 239);color:#0f172a">0.7</td><td style="background:rgb(202, 230, 226);color:#0f172a">1.6</td><td style="background:rgb(164, 207, 202);color:#0f172a">3.1</td><td style="background:rgb(194, 225, 221);color:#0f172a">1.9</td><td style="background:rgb(195, 226, 222);color:#0f172a">1.9</td><td style="background:rgb(154, 202, 197);color:#0f172a">3.5</td><td style="background:rgb(225, 244, 241);color:#0f172a">0.6</td><td style="background:rgb(123, 183, 177);color:#0f172a">4.8</td><td style="background:rgb(202, 230, 226);color:#0f172a">1.6</td><td style="background:rgb(171, 212, 207);color:#0f172a">2.8</td><td style="background:rgb(159, 204, 200);color:#0f172a">3.3</td><td style="background:rgb(181, 218, 214);color:#0f172a">2.4</td><td style="background:rgb(176, 215, 210);color:#0f172a">2.6</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(196, 227, 223);color:#0f172a">1.8</td><td style="background:rgb(225, 244, 241);color:#0f172a">0.6</td>
+      <td><b>34.0</b></td><td>40</td>
+    </tr>
+    
+    <tr>
+      <td class="zone">Battaramulla</td>
+      <td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(143, 195, 190);color:#0f172a">4.0</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(212, 236, 233);color:#0f172a">1.2</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(209, 234, 230);color:#0f172a">1.3</td><td style="background:rgb(209, 235, 231);color:#0f172a">1.3</td><td style="background:rgb(198, 228, 224);color:#0f172a">1.7</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(162, 206, 202);color:#0f172a">3.2</td><td style="background:rgb(190, 223, 219);color:#0f172a">2.1</td><td style="background:rgb(71, 152, 145);color:#ffffff">6.9</td><td style="background:rgb(179, 217, 212);color:#0f172a">2.5</td><td style="background:rgb(207, 233, 230);color:#0f172a">1.3</td><td style="background:rgb(203, 231, 227);color:#0f172a">1.5</td><td style="background:rgb(202, 230, 226);color:#0f172a">1.6</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td>
+      <td><b>28.5</b></td><td>23</td>
+    </tr>
+    
+    <tr>
+      <td class="zone">Rajagiriya</td>
+      <td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(208, 234, 230);color:#0f172a">1.3</td><td style="background:rgb(152, 200, 195);color:#0f172a">3.6</td><td style="background:rgb(171, 211, 207);color:#0f172a">2.9</td><td style="background:rgb(217, 239, 236);color:#0f172a">1.0</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(217, 239, 236);color:#0f172a">0.9</td><td style="background:rgb(176, 215, 210);color:#0f172a">2.6</td><td style="background:rgb(167, 209, 205);color:#0f172a">3.0</td><td style="background:rgb(169, 211, 206);color:#0f172a">2.9</td><td style="background:rgb(189, 222, 218);color:#0f172a">2.1</td><td style="background:rgb(201, 229, 225);color:#0f172a">1.6</td><td style="background:rgb(217, 239, 236);color:#0f172a">0.9</td><td style="background:rgb(198, 228, 224);color:#0f172a">1.7</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(199, 228, 224);color:#0f172a">1.7</td><td style="background:rgb(224, 244, 240);color:#0f172a">0.6</td><td style="background:rgb(231, 248, 244);color:#0f172a">0.4</td><td style="background:rgb(214, 238, 234);color:#0f172a">1.1</td>
+      <td><b>28.4</b></td><td>27</td>
+    </tr>
+    
+    <tr>
+      <td class="zone">Dehiwala</td>
+      <td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(196, 227, 223);color:#0f172a">1.8</td><td style="background:rgb(155, 202, 197);color:#0f172a">3.5</td><td style="background:rgb(157, 203, 198);color:#0f172a">3.4</td><td style="background:rgb(220, 241, 238);color:#0f172a">0.8</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(227, 245, 242);color:#0f172a">0.6</td><td style="background:rgb(167, 209, 205);color:#0f172a">3.0</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(165, 208, 203);color:#0f172a">3.1</td><td style="background:rgb(212, 236, 232);color:#0f172a">1.2</td><td style="background:rgb(206, 233, 229);color:#0f172a">1.4</td><td style="background:rgb(203, 231, 227);color:#0f172a">1.5</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:rgb(213, 237, 233);color:#0f172a">1.1</td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td><td style="background:#ffffff;color:#94a3b8"></td>
+      <td><b>21.4</b></td><td>20</td>
+    </tr>
+    
+  </table>
+</section>
+
+<div class="grid2">
+<section>
+  <h2>4. Long idle periods</h2>
+  <p class="hint">Vehicles that stayed idle for 90 simulated minutes or more in one stretch.</p>
+  
+  <table>
+    <tr><th>Vehicle</th><th>Type</th><th class="n">Longest idle</th><th class="n">Episodes</th><th class="n">Idle share</th></tr>
+    
+    <tr><td>V030</td><td>mini</td><td class="n">358 min</td><td class="n">1</td>
+        <td class="n">85%</td></tr>
+    
+    <tr><td>V019</td><td>tuk</td><td class="n">242 min</td><td class="n">2</td>
+        <td class="n">72%</td></tr>
+    
+    <tr><td>V027</td><td>mini</td><td class="n">194 min</td><td class="n">2</td>
+        <td class="n">66%</td></tr>
+    
+    <tr><td>V016</td><td>car</td><td class="n">190 min</td><td class="n">1</td>
+        <td class="n">53%</td></tr>
+    
+    <tr><td>V028</td><td>car</td><td class="n">166 min</td><td class="n">1</td>
+        <td class="n">68%</td></tr>
+    
+    <tr><td>V021</td><td>tuk</td><td class="n">150 min</td><td class="n">2</td>
+        <td class="n">71%</td></tr>
+    
+    <tr><td>V026</td><td>car</td><td class="n">130 min</td><td class="n">1</td>
+        <td class="n">58%</td></tr>
+    
+    <tr><td>V001</td><td>tuk</td><td class="n">122 min</td><td class="n">1</td>
+        <td class="n">53%</td></tr>
+    
+    <tr><td>V017</td><td>mini</td><td class="n">114 min</td><td class="n">1</td>
+        <td class="n">62%</td></tr>
+    
+    <tr><td>V007</td><td>mini</td><td class="n">112 min</td><td class="n">1</td>
+        <td class="n">90%</td></tr>
+    
+    <tr><td>V006</td><td>tuk</td><td class="n">108 min</td><td class="n">1</td>
+        <td class="n">47%</td></tr>
+    
+    <tr><td>V022</td><td>car</td><td class="n">108 min</td><td class="n">2</td>
+        <td class="n">69%</td></tr>
+    
+    <tr><td>V011</td><td>mini</td><td class="n">104 min</td><td class="n">1</td>
+        <td class="n">57%</td></tr>
+    
+    <tr><td>V014</td><td>mini</td><td class="n">102 min</td><td class="n">1</td>
+        <td class="n">54%</td></tr>
+    
+    <tr><td>V029</td><td>tuk</td><td class="n">94 min</td><td class="n">1</td>
+        <td class="n">44%</td></tr>
+    
+  </table>
+  
+</section>
+
+<section>
+  <h2>5. Data quality and lineage</h2>
+  <p class="hint">What the batch layer cleaned, and where the numbers came from.</p>
+  <dl>
+    <dt>Telemetry events</dt><dd>11,345</dd>
+    <dt>Invalid events</dt><dd>45 (sent to the dead-letter queue)</dd>
+    <dt>Duplicates removed</dt><dd>109</dd>
+    <dt>Late arrivals</dt><dd>173 events arrived more than 10 simulated minutes late</dd>
+    <dt>Partner file</dt><dd><code>expenses_2026-09-09.csv</code> sha256 <code>4a08a85ca448</code></dd>
+    <dt>Partner rows</dt><dd>32 received, 30 valid, 2 quarantined</dd>
+    <dt>Distance mismatches</dt><dd>1 vehicle</dd>
+  </dl>
+  
+  <table style="margin-top:10px">
+    <tr><th class="n">Row</th><th>Record</th><th>Vehicle</th><th>Reason</th></tr>
+    <tr><td class="n">15</td><td>EXP-20260909-V013</td><td>V013</td><td>duplicate_record</td></tr><tr><td class="n">18</td><td>EXP-20260909-X009</td><td>V099</td><td>unknown_vehicle</td></tr>
+  </table>
+  
+  <table style="margin-top:10px">
+    <tr><th>Speed vs batch layer</th><th class="n">Speed</th><th class="n">Batch</th><th class="n">Difference</th></tr>
+    
+    <tr><td>fares (LKR)</td><td class="n">441,945</td><td class="n">443,783</td>
+        <td class="n">0.41%</td></tr>
+    
+    <tr><td>GPS pings</td><td class="n">10,259</td><td class="n">10,299</td>
+        <td class="n">0.39%</td></tr>
+    
+    <tr><td>trips</td><td class="n">445</td><td class="n">447</td>
+        <td class="n">0.45%</td></tr>
+    
+  </table>
+</section>
+</div>
+
+<footer>
+  Built by the Airflow DAG <code>fleet_daily_batch</code>. All numbers are recomputed by the Spark batch layer from the raw master dataset
+  (Kafka archive in Parquet) joined with the partner cost file. Simulated clock: 1 real second = 2 simulated minutes.
+</footer>
+</div>
+</body>
+</html>

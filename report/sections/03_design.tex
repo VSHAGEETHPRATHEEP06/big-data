@@ -1,0 +1,70 @@
+\section{System design}
+
+\subsection{Architecture overview}
+Figure~\ref{fig:architecture} shows the whole system, from the two sources to the three ways of serving
+results. Every box runs in its own Docker container, and one Docker Compose file starts all of them.
+
+\begin{figure}[!htb]
+\centering
+\input{figures/architecture}
+\caption{FleetPulse architecture. The top row is the streaming path and the bottom row is the daily batch
+path. Both meet in PostgreSQL. The dotted lines show that every stage sends logs and metrics.}
+\label{fig:architecture}
+\end{figure}
+
+\textbf{Streaming path.} The stream simulator sends a JSON event to Kafka for every vehicle every real
+second. Spark Structured Streaming reads the topic with four queries. Three of them clean the events and
+update the real-time tables in PostgreSQL. The fourth writes every raw record, unchanged, to the master
+dataset in Parquet.
+
+\textbf{Batch path.} Once per simulated day the batch simulator drops a CSV file and a manifest into the
+landing zone. An Airflow sensor finds the file, checks it and copies it into the master dataset. Airflow
+then starts a Spark batch job. The job reads one full day of raw events, removes bad and repeated records,
+joins the day with the cost file and writes exact results to PostgreSQL in a single transaction.
+
+\textbf{Serving.} PostgreSQL views merge the two layers. The FastAPI service, the Grafana dashboards and the
+daily report all read from these tables and views.
+
+\subsection{Data sources}
+The streaming source sends one JSON event per Kafka message with the fields \code{event\_id} (a UUID, also
+sent as the Kafka header \code{trace\_id}), \code{event\_type} (\code{ping} every 2 simulated minutes,
+\code{trip\_start} or \code{trip\_end}), \code{event\_ts} (simulated time), \code{vehicle\_id},
+\code{driver\_id}, \code{trip\_id} (empty when idle), \code{status} (\code{idle}, \code{enroute} to a
+pickup or \code{on\_trip}), \code{lat}, \code{lon}, \code{speed} (km/h), \code{odometer\_km} and
+\code{fare} (the running fare, or the final fare on \code{trip\_end}). A \code{trip\_end} event also carries
+the pickup point, trip distance and duration. We added \code{event\_id}, \code{event\_type} and
+\code{odometer\_km} to the fields listed in the brief.
+
+The daily source is a CSV file from the fuel and garage partners, with a manifest. It has one row per
+vehicle and day with the fields \code{record\_id}, \code{expense\_date}, \code{vehicle\_id},
+\code{partner\_id}, \code{fuel\_litres}, \code{fuel\_cost}, \code{maintenance\_cost} (upkeep, wear and any
+service bill), \code{distance\_covered} (kilometres reported by the partner, which we check against GPS) and
+\code{service\_flag} (\code{Y} on a day with a garage service).
+
+To test the cleaning logic, both sources add problems on purpose: about 1\% of events are sent twice,
+0.5\% of pings are broken (bad JSON, missing ids, a GPS point at 0,0, negative speed and more), and
+vehicles sometimes lose signal and send their events late. Most daily files also contain a repeated row, a
+row for an unknown vehicle, a bad number or a missing vehicle id.
+
+\subsection{Kafka design}
+We use two topics. \code{fleet.telemetry.raw} has six partitions and carries all telemetry, which the speed
+layer reads and archives for the batch layer. \code{fleet.telemetry.dlq} has one partition. It is the
+dead-letter queue, which keeps invalid events with the reason for checks and replay. Messages are keyed by
+\code{vehicle\_id}, so all events of one vehicle go to the same partition and stay in order. This order
+matters for idle streaks and trips. Six partitions allow up to six consumers to read in parallel. The
+producer uses \code{acks=all} with the idempotent producer switched on, so retries after a network error never
+create duplicates in Kafka. It also uses lz4 compression and a 20~ms linger time to send small batches.
+
+\subsection{Storage design}
+The \textbf{master dataset} is a folder of Parquet files that we never change, only add to. Raw telemetry is
+partitioned by the simulated date (\code{lake/raw/telemetry/event\_date=2026-09-01/}) and written by the
+Spark file sink, whose metadata log makes each write exactly-once. The partner files are kept in
+\code{lake/raw/expenses/}. The batch layer also keeps its own results in \code{lake/curated/} and reads the
+last two days from there to find profit trends.
+
+\textbf{PostgreSQL 17} is the serving store. We chose it because the views are small (a few hundred rows per
+day), and it gives SQL, joins, upserts and transactions. It has five schemas: \code{ref} (vehicles and zones),
+\code{speed} (live zone and vehicle metrics, vehicle state and idle alerts), \code{batch} (exact metrics,
+trips, profitability, cost rates, quarantined cost rows and the daily summary), \code{serving} (views that
+merge the two layers and the live profit projection) and \code{ops} (simulated clock, micro-batch ledger,
+dead letters, run audit trail, alert notifications and reconciliation).

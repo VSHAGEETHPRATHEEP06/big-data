@@ -1,0 +1,1217 @@
+{
+  "uid": "fleet-daily",
+  "title": "FleetPulse | Daily profitability (batch layer)",
+  "description": "Batch layer: exact daily per-vehicle profitability",
+  "tags": [
+    "fleetpulse"
+  ],
+  "timezone": "browser",
+  "editable": false,
+  "graphTooltip": 1,
+  "refresh": "30s",
+  "schemaVersion": 41,
+  "version": 1,
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "templating": {
+    "list": [
+      {
+        "name": "sim_date",
+        "label": "Simulated day",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "fleetdb"
+        },
+        "query": "SELECT sim_date::text FROM batch.daily_summary ORDER BY sim_date DESC",
+        "definition": "SELECT sim_date::text FROM batch.daily_summary ORDER BY sim_date DESC",
+        "refresh": 1,
+        "sort": 0,
+        "includeAll": false,
+        "multi": false,
+        "hide": 0,
+        "current": {}
+      }
+    ]
+  },
+  "annotations": {
+    "list": []
+  },
+  "links": [],
+  "panels": [
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Trips",
+      "description": "",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 2,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT trips FROM batch.daily_summary WHERE sim_date = '${sim_date}'",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": null,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#0f766e",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Fares (LKR)",
+      "description": "",
+      "gridPos": {
+        "x": 2,
+        "y": 0,
+        "w": 3,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT revenue_lkr FROM batch.daily_summary WHERE sim_date = '${sim_date}'",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#0f766e",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Costs (LKR)",
+      "description": "Fuel and maintenance from the partner file",
+      "gridPos": {
+        "x": 5,
+        "y": 0,
+        "w": 3,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT fuel_cost_lkr + maintenance_cost_lkr FROM batch.daily_summary WHERE sim_date = '${sim_date}'",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#0f766e",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Net profit",
+      "description": "Fleet net profit in LKR",
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 3,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT net_profit_lkr FROM batch.daily_summary WHERE sim_date = '${sim_date}'",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Utilization",
+      "description": "Minutes on a trip divided by minutes online",
+      "gridPos": {
+        "x": 11,
+        "y": 0,
+        "w": 3,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT fleet_utilization_pct FROM batch.daily_summary WHERE sim_date = '${sim_date}'",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#0f766e",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Unprofitable",
+      "description": "",
+      "gridPos": {
+        "x": 14,
+        "y": 0,
+        "w": 3,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT unprofitable_vehicles FROM batch.daily_summary WHERE sim_date = '${sim_date}'",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": null,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "type": "stat",
+      "title": "At risk",
+      "description": "",
+      "gridPos": {
+        "x": 17,
+        "y": 0,
+        "w": 3,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT at_risk_vehicles FROM batch.daily_summary WHERE sim_date = '${sim_date}'",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": null,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 9,
+      "type": "stat",
+      "title": "Becoming unprofitable",
+      "description": "",
+      "gridPos": {
+        "x": 20,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT becoming_unprofitable_vehicles FROM batch.daily_summary WHERE sim_date = '${sim_date}'",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "wideLayout": true,
+        "showPercentChange": false
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": null,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 10,
+      "type": "table",
+      "title": "Per-vehicle profitability (batch layer, exact)",
+      "description": "",
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 24,
+        "h": 12
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT vehicle_id AS vehicle, vehicle_type AS type, trips, round(revenue_lkr) AS fares, round(total_cost_lkr) AS costs, round(net_profit_lkr) AS net_profit, round(margin_pct) AS margin, lower(trend) AS trend, status, array_to_string(reasons, ' | ') AS reasons FROM batch.vehicle_profitability WHERE sim_date = '${sim_date}' ORDER BY net_profit_lkr",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "UNPROFITABLE": {
+                        "color": "red",
+                        "index": 0
+                      },
+                      "AT_RISK": {
+                        "color": "orange",
+                        "index": 1
+                      },
+                      "PROFITABLE": {
+                        "color": "green",
+                        "index": 2
+                      },
+                      "NO_COST_DATA": {
+                        "color": "text",
+                        "index": 3
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "net_profit"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reasons"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 520
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "type": "barchart",
+      "title": "Twelve lowest net profits (LKR)",
+      "description": "",
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT vehicle_id, round(net_profit_lkr) AS net_profit FROM batch.vehicle_profitability WHERE sim_date = '${sim_date}' ORDER BY net_profit_lkr LIMIT 12",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "orientation": "vertical",
+        "xField": "vehicle_id",
+        "showValue": "auto",
+        "barWidth": 0.8,
+        "groupWidth": 0.75,
+        "stacking": "none",
+        "fullHighlight": false,
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#0f766e"
+          },
+          "custom": {
+            "fillOpacity": 85,
+            "lineWidth": 0,
+            "gradientMode": "none"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 12,
+      "type": "barchart",
+      "title": "Fares by pickup zone (LKR)",
+      "description": "",
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT zone, round(sum(earnings_lkr)) AS fares FROM batch.zone_hourly WHERE sim_date = '${sim_date}' GROUP BY zone ORDER BY 2 DESC",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "xField": "zone",
+        "showValue": "auto",
+        "barWidth": 0.8,
+        "groupWidth": 0.75,
+        "stacking": "none",
+        "fullHighlight": false,
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#0f766e"
+          },
+          "custom": {
+            "fillOpacity": 85,
+            "lineWidth": 0,
+            "gradientMode": "none"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 13,
+      "type": "table",
+      "title": "Fares by zone and hour of day (thousand LKR)",
+      "description": "",
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 24,
+        "h": 13
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT zone, round(sum(earnings_lkr) FILTER (WHERE hour = 0) / 1000, 1) AS \"00\", round(sum(earnings_lkr) FILTER (WHERE hour = 1) / 1000, 1) AS \"01\", round(sum(earnings_lkr) FILTER (WHERE hour = 2) / 1000, 1) AS \"02\", round(sum(earnings_lkr) FILTER (WHERE hour = 3) / 1000, 1) AS \"03\", round(sum(earnings_lkr) FILTER (WHERE hour = 4) / 1000, 1) AS \"04\", round(sum(earnings_lkr) FILTER (WHERE hour = 5) / 1000, 1) AS \"05\", round(sum(earnings_lkr) FILTER (WHERE hour = 6) / 1000, 1) AS \"06\", round(sum(earnings_lkr) FILTER (WHERE hour = 7) / 1000, 1) AS \"07\", round(sum(earnings_lkr) FILTER (WHERE hour = 8) / 1000, 1) AS \"08\", round(sum(earnings_lkr) FILTER (WHERE hour = 9) / 1000, 1) AS \"09\", round(sum(earnings_lkr) FILTER (WHERE hour = 10) / 1000, 1) AS \"10\", round(sum(earnings_lkr) FILTER (WHERE hour = 11) / 1000, 1) AS \"11\", round(sum(earnings_lkr) FILTER (WHERE hour = 12) / 1000, 1) AS \"12\", round(sum(earnings_lkr) FILTER (WHERE hour = 13) / 1000, 1) AS \"13\", round(sum(earnings_lkr) FILTER (WHERE hour = 14) / 1000, 1) AS \"14\", round(sum(earnings_lkr) FILTER (WHERE hour = 15) / 1000, 1) AS \"15\", round(sum(earnings_lkr) FILTER (WHERE hour = 16) / 1000, 1) AS \"16\", round(sum(earnings_lkr) FILTER (WHERE hour = 17) / 1000, 1) AS \"17\", round(sum(earnings_lkr) FILTER (WHERE hour = 18) / 1000, 1) AS \"18\", round(sum(earnings_lkr) FILTER (WHERE hour = 19) / 1000, 1) AS \"19\", round(sum(earnings_lkr) FILTER (WHERE hour = 20) / 1000, 1) AS \"20\", round(sum(earnings_lkr) FILTER (WHERE hour = 21) / 1000, 1) AS \"21\", round(sum(earnings_lkr) FILTER (WHERE hour = 22) / 1000, 1) AS \"22\", round(sum(earnings_lkr) FILTER (WHERE hour = 23) / 1000, 1) AS \"23\" FROM batch.zone_hourly WHERE sim_date = '${sim_date}' GROUP BY zone ORDER BY sum(earnings_lkr) DESC",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byType",
+              "options": "number"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "gradient"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-greens"
+                }
+              },
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "custom.width",
+                "value": 46
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 14,
+      "type": "table",
+      "title": "Speed layer vs batch layer",
+      "description": "The batch layer includes late events and exact de-duplication.",
+      "gridPos": {
+        "x": 0,
+        "y": 38,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT metric, speed_value, batch_value, diff, diff_pct FROM ops.layer_reconciliation WHERE sim_date = '${sim_date}' ORDER BY metric",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 15,
+      "type": "table",
+      "title": "Data quality",
+      "description": "",
+      "gridPos": {
+        "x": 8,
+        "y": 38,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT 'telemetry events' AS item, events_total AS value FROM batch.daily_summary WHERE sim_date = '${sim_date}' UNION ALL SELECT 'invalid events', events_invalid FROM batch.daily_summary WHERE sim_date = '${sim_date}' UNION ALL SELECT 'duplicates removed', duplicates_removed FROM batch.daily_summary WHERE sim_date = '${sim_date}' UNION ALL SELECT 'late events recovered', late_events FROM batch.daily_summary WHERE sim_date = '${sim_date}' UNION ALL SELECT 'partner rows quarantined', expense_rows_quarantined FROM batch.daily_summary WHERE sim_date = '${sim_date}' UNION ALL SELECT 'distance mismatches', distance_mismatch_vehicles FROM batch.daily_summary WHERE sim_date = '${sim_date}'",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 16,
+      "type": "table",
+      "title": "Quarantined partner rows",
+      "description": "",
+      "gridPos": {
+        "x": 16,
+        "y": 38,
+        "w": 8,
+        "h": 7
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT row_no, record_id, vehicle_id, array_to_string(reasons, ', ') AS reasons FROM batch.expense_quarantine WHERE sim_date = '${sim_date}' ORDER BY row_no",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 17,
+      "type": "barchart",
+      "title": "Fleet net profit by day (LKR)",
+      "description": "",
+      "gridPos": {
+        "x": 0,
+        "y": 45,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT sim_date::text AS day, round(revenue_lkr) AS fares, round(net_profit_lkr) AS net_profit FROM batch.daily_summary ORDER BY sim_date",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "orientation": "vertical",
+        "xField": "day",
+        "showValue": "auto",
+        "barWidth": 0.8,
+        "groupWidth": 0.75,
+        "stacking": "none",
+        "fullHighlight": false,
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic",
+            "fixedColor": "#0f766e"
+          },
+          "custom": {
+            "fillOpacity": 85,
+            "lineWidth": 0,
+            "gradientMode": "none"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 18,
+      "type": "barchart",
+      "title": "Problem vehicles by day",
+      "description": "",
+      "gridPos": {
+        "x": 12,
+        "y": 45,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "fleetdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "fleetdb"
+          },
+          "rawSql": "SELECT sim_date::text AS day, unprofitable_vehicles AS unprofitable, at_risk_vehicles AS at_risk, becoming_unprofitable_vehicles AS becoming_unprofitable FROM batch.daily_summary ORDER BY sim_date",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "orientation": "vertical",
+        "xField": "day",
+        "showValue": "auto",
+        "barWidth": 0.8,
+        "groupWidth": 0.75,
+        "stacking": "none",
+        "fullHighlight": false,
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic",
+            "fixedColor": "#0f766e"
+          },
+          "custom": {
+            "fillOpacity": 85,
+            "lineWidth": 0,
+            "gradientMode": "none"
+          }
+        },
+        "overrides": []
+      }
+    }
+  ]
+}

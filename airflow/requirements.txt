@@ -1,0 +1,2 @@
+# Everything else (psycopg2, Jinja2, prometheus-client, statsd) is already in the Airflow image
+pyspark==4.1.3

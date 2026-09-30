@@ -1,0 +1,18 @@
+\begin{table}[!htb]
+\centering\small
+\caption{Speed layer compared with the batch layer, and what the batch layer cleaned, per day (days 2 to 15, lowest, average and highest day).}
+\label{tab:recon}
+\begin{tabularx}{\textwidth}{@{}L rrr@{}}
+\toprule
+\textbf{Measure per day} & \textbf{Lowest} & \textbf{Average} & \textbf{Highest} \\
+\midrule
+Trips missed by the speed layer & 0 & 1.9 & 5 \\
+Fares missed by the speed layer (\% of batch fares) & 0.00 & 0.42 & 1.11 \\
+Pings missed by the speed layer (\% of batch pings) & 0.08 & 0.31 & 0.66 \\
+Late events (more than 10 simulated minutes) & 55 & 174 & 256 \\
+Repeated events removed & 84 & 109 & 134 \\
+Invalid events removed & 24 & 35 & 47 \\
+Bad cost rows put in quarantine & 0 & 1.6 & 3 \\
+\bottomrule
+\end{tabularx}
+\end{table}

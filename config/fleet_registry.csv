@@ -1,0 +1,31 @@
+vehicle_id,driver_id,vehicle_type,plate_no,home_zone,profile,km_per_litre,shift_start_hour,shift_hours
+V001,D001,tuk,WP QA-1021,Fort-Pettah,normal,28,6,12
+V002,D002,tuk,WP QA-1187,Maradana,normal,27,7,12
+V003,D003,tuk,WP QB-2210,Borella,normal,29,6,11
+V004,D004,tuk,WP QB-3345,Kotahena,normal,28,12,12
+V005,D005,tuk,WP QC-4412,Wellawatte,normal,27,6,12
+V006,D006,tuk,WP QC-5530,Dehiwala,normal,28,14,10
+V007,D007,mini,WP CAD-6621,Bambalapitiya,degrading,16,6,12
+V008,D008,tuk,WP QD-7734,Nugegoda,normal,29,7,12
+V009,D009,tuk,WP QD-8821,Rajagiriya,normal,28,6,12
+V010,D010,tuk,WP QE-9102,Battaramulla,normal,27,12,12
+V011,D011,mini,WP CAE-1045,Kollupitiya,normal,17,6,12
+V012,D012,mini,WP CAE-2290,Cinnamon Gardens,normal,16,7,12
+V013,D013,car,WP CAF-3378,Fort-Pettah,high_maintenance,12,6,12
+V014,D014,mini,WP CAF-4403,Borella,normal,17,12,12
+V015,D015,mini,WP CAG-5519,Wellawatte,normal,16,6,12
+V016,D016,car,WP CAG-6647,Kollupitiya,normal,13,7,12
+V017,D017,mini,WP CAH-7712,Nugegoda,normal,17,14,10
+V018,D018,car,WP CAH-8836,Cinnamon Gardens,normal,13,6,12
+V019,D019,tuk,WP QF-9941,Maradana,normal,28,18,12
+V020,D020,mini,WP CAJ-1158,Rajagiriya,normal,16,6,12
+V021,D021,tuk,WP QG-2264,Dehiwala,idle_prone,27,6,12
+V022,D022,car,WP CAJ-3371,Bambalapitiya,normal,12,12,12
+V023,D023,mini,WP CAK-4486,Battaramulla,normal,17,6,12
+V024,D024,car,WP CAK-5592,Fort-Pettah,normal,13,6,12
+V025,D025,tuk,WP QH-6605,Kotahena,normal,28,6,12
+V026,D026,car,WP CAL-7719,Wellawatte,fuel_anomaly,12,7,12
+V027,D027,mini,WP CAL-8823,Kollupitiya,idle_prone,16,6,12
+V028,D028,car,WP CAM-9937,Borella,normal,13,14,10
+V029,D029,tuk,WP QJ-1042,Nugegoda,normal,29,6,12
+V030,D030,mini,WP CAM-2156,Dehiwala,normal,16,20,10

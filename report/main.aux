@@ -1,0 +1,102 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Use case}{1}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Business requirements}{1}{subsection.1.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Business requirements taken from the use case.}}{1}{table.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:requirements}{{1}{1}{Business requirements taken from the use case}{table.caption.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Simulated clock and assumptions}{1}{subsection.1.3}\protected@file@percent }
+\citation{kleppmann2017}
+\citation{marz2015}
+\citation{kreps2014}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Architecture decision: Lambda or Kappa}{2}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}The two options}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Comparing the options with our requirements}{2}{subsection.2.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Lambda and Kappa compared for our use case. The last column shows which option fits us better.}}{2}{table.caption.2}\protected@file@percent }
+\newlabel{tab:lambda-kappa}{{2}{2}{Lambda and Kappa compared for our use case. The last column shows which option fits us better}{table.caption.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Our decision: Lambda}{2}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}The rejected alternative: Kappa}{3}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}How we reduce the weak points of Lambda}{3}{subsection.2.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces How the serving layer uses the two layers over time. Finished days come from the batch layer. Today comes from the speed layer until the batch run for today replaces it after midnight.}}{3}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:handover}{{1}{3}{How the serving layer uses the two layers over time. Finished days come from the batch layer. Today comes from the speed layer until the batch run for today replaces it after midnight}{figure.caption.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}System design}{3}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Architecture overview}{3}{subsection.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces FleetPulse architecture. The top row is the streaming path and the bottom row is the daily batch path. Both meet in PostgreSQL. The dotted lines show that every stage sends logs and metrics.}}{4}{figure.caption.4}\protected@file@percent }
+\newlabel{fig:architecture}{{2}{4}{FleetPulse architecture. The top row is the streaming path and the bottom row is the daily batch path. Both meet in PostgreSQL. The dotted lines show that every stage sends logs and metrics}{figure.caption.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Data sources}{4}{subsection.3.2}\protected@file@percent }
+\citation{spark}
+\citation{kafka}
+\citation{airflow}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Kafka design}{5}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Storage design}{5}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Technology stack and justification}{5}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Implementation}{5}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Simulated data sources}{5}{subsection.5.1}\protected@file@percent }
+\newlabel{sec:sources}{{5.1}{5}{Simulated data sources}{subsection.5.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Technology stack.}}{6}{table.caption.5}\protected@file@percent }
+\newlabel{tab:stack}{{3}{6}{Technology stack}{table.caption.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Speed layer}{6}{subsection.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Streaming queries of the speed layer.}}{7}{table.caption.6}\protected@file@percent }
+\newlabel{tab:queries}{{4}{7}{Streaming queries of the speed layer}{table.caption.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Batch layer and orchestration}{7}{subsection.5.3}\protected@file@percent }
+\newlabel{sec:batch}{{5.3}{7}{Batch layer and orchestration}{subsection.5.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Airflow view of the DAG \texttt  {fleet\_daily\_batch}. Each row is a task and each column is one run, that is one simulated day. Green means success.}}{7}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:dag}{{3}{7}{Airflow view of the DAG \code {fleet\_daily\_batch}. Each row is a task and each column is one run, that is one simulated day. Green means success}{figure.caption.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Serving layer}{8}{subsection.5.4}\protected@file@percent }
+\newlabel{sec:serving}{{5.4}{8}{Serving layer}{subsection.5.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Main API endpoints.}}{8}{table.caption.8}\protected@file@percent }
+\newlabel{tab:api}{{5}{8}{Main API endpoints}{table.caption.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Observability design}{8}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Structured logging}{8}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Metrics}{9}{subsection.6.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Main metrics, grouped by pipeline stage.}}{9}{table.caption.9}\protected@file@percent }
+\newlabel{tab:metrics}{{6}{9}{Main metrics, grouped by pipeline stage}{table.caption.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Tracing and lineage}{9}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Alerts and health checks}{9}{subsection.6.4}\protected@file@percent }
+\newlabel{sec:alerts}{{6.4}{9}{Alerts and health checks}{subsection.6.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Main alert rules (real seconds, simulated time in brackets).}}{10}{table.caption.10}\protected@file@percent }
+\newlabel{tab:alerts}{{7}{10}{Main alert rules (real seconds, simulated time in brackets)}{table.caption.10}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Results}{10}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Live operations (speed layer)}{10}{subsection.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Daily profitability (batch layer)}{10}{subsection.7.2}\protected@file@percent }
+\newlabel{sec:daily}{{7.2}{10}{Daily profitability (batch layer)}{subsection.7.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Grafana dashboard ``Fleet operations (live)'', fed by the speed layer. It answers the first part of the business question: utilisation and earnings by area and time of day, right now.}}{11}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:live}{{4}{11}{Grafana dashboard ``Fleet operations (live)'', fed by the speed layer. It answers the first part of the business question: utilisation and earnings by area and time of day, right now}{figure.caption.11}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Exact daily results from the batch layer (money in LKR). Day 1 is 18 hours long.}}{11}{table.caption.12}\protected@file@percent }
+\newlabel{tab:daily}{{8}{11}{Exact daily results from the batch layer (money in LKR). Day 1 is 18 hours long}{table.caption.12}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Daily net profit of the vehicles with special profiles and the average of all other vehicles (batch layer, LKR).}}{12}{figure.caption.13}\protected@file@percent }
+\newlabel{fig:trend}{{5}{12}{Daily net profit of the vehicles with special profiles and the average of all other vehicles (batch layer, LKR)}{figure.caption.13}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Top of the daily HTML report built by Airflow for day 15 Sep{}. It lists the vehicles that need attention and explains why, which answers the second part of the business question.}}{12}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:report}{{6}{12}{Top of the daily HTML report built by Airflow for day \ReportDay {}. It lists the vehicles that need attention and explains why, which answers the second part of the business question}{figure.caption.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Speed layer compared with the batch layer}{12}{subsection.7.3}\protected@file@percent }
+\newlabel{sec:reconciliation}{{7.3}{12}{Speed layer compared with the batch layer}{subsection.7.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}Orchestration and pipeline health}{12}{subsection.7.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Speed layer compared with the batch layer, and what the batch layer cleaned, per day (days 2 to 15, lowest, average and highest day).}}{13}{table.caption.15}\protected@file@percent }
+\newlabel{tab:recon}{{9}{13}{Speed layer compared with the batch layer, and what the batch layer cleaned, per day (days 2 to 15, lowest, average and highest day)}{table.caption.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Grafana dashboard ``Pipeline health'' during the failure drill (top rows and alert tables). The gap from 16:51 to 16:54 in the charts (Sri Lanka time) is the drill. The table on the right lists the alert notifications that reached the API, with times in UTC. Lower rows (latency, lag, Airflow tasks and the run audit trail) are not shown.}}{13}{figure.caption.16}\protected@file@percent }
+\newlabel{fig:health}{{7}{13}{Grafana dashboard ``Pipeline health'' during the failure drill (top rows and alert tables). The gap from 16:51 to 16:54 in the charts (Sri Lanka time) is the drill. The table on the right lists the alert notifications that reached the API, with times in UTC. Lower rows (latency, lag, Airflow tasks and the run audit trail) are not shown}{figure.caption.16}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.5}Performance on one laptop}{13}{subsection.7.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Speed and resource use during the run.}}{14}{table.caption.17}\protected@file@percent }
+\newlabel{tab:perf}{{10}{14}{Speed and resource use during the run}{table.caption.17}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.6}Testing}{14}{subsection.7.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Limitations, trade-offs and production changes}{14}{section.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Limitations}{14}{subsection.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Trade-offs we accepted}{14}{subsection.8.2}\protected@file@percent }
+\bibcite{marz2015}{1}
+\bibcite{kreps2014}{2}
+\bibcite{kleppmann2017}{3}
+\bibcite{spark}{4}
+\bibcite{kafka}{5}
+\bibcite{airflow}{6}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}What we would change at production scale}{15}{subsection.8.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Conclusion}{15}{section.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {10}Individual contributions}{15}{section.10}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces Individual contributions.}}{15}{table.caption.18}\protected@file@percent }
+\newlabel{tab:contrib}{{11}{15}{Individual contributions}{table.caption.18}{}}
+\newlabel{LastPage}{{10}{15}{Individual contributions}{page.15}{}}
+\gdef\lastpage@lastpage{15}
+\gdef\lastpage@lastpageHy{15}
+\gdef \@abspage@last{16}

@@ -1,0 +1,78 @@
+\section{Results}
+We ran the full system for \NumDays{} simulated days (about \RunMinutes{} real minutes) on a MacBook with an
+Apple M-series chip and 8\,GB of memory. This section shows what the system produced.
+
+\subsection{Live operations (speed layer)}
+Figure~\ref{fig:live} shows the top of the live Grafana dashboard. \LiveText{} The map shows each vehicle
+by status (green on a trip, blue going to a pickup, orange idle). The charts show fares by pickup zone, trips
+per simulated hour and the status of vehicles in each zone. Further down, the dashboard has a utilisation
+heatmap by zone and hour, the open idle alerts and the profit projection for today, which is the Lambda
+merge of Section~\ref{sec:serving}.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/grafana_live.png}
+\caption{Grafana dashboard ``Fleet operations (live)'', fed by the speed layer. It answers the first part of
+the business question: utilisation and earnings by area and time of day, right now.}
+\label{fig:live}
+\end{figure}
+
+\subsection{Daily profitability (batch layer)}
+\label{sec:daily}
+Table~\ref{tab:daily} gives the exact batch results for each day. Figure~\ref{fig:report} shows the top of
+a daily report, and Figure~\ref{fig:trend} shows the daily net profit of the three problem vehicles compared
+with the fleet average.
+
+\input{sections/gen_daily_table}
+
+\BusinessText{}
+
+\begin{figure}[!htb]
+\centering
+\input{sections/gen_trend_plot}
+\caption{Daily net profit of the vehicles with special profiles and the average of all other vehicles
+(batch layer, LKR).}
+\label{fig:trend}
+\end{figure}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/daily_report_top.png}
+\caption{Top of the daily HTML report built by Airflow for day \ReportDay{}. It lists the vehicles that
+need attention and explains why, which answers the second part of the business question.}
+\label{fig:report}
+\end{figure}
+
+\subsection{Speed layer compared with the batch layer}
+\label{sec:reconciliation}
+After each batch run the DAG compares the day's totals from both layers (Table~\ref{tab:recon}). The speed
+layer missed some events because they arrived after its 10-minute watermark. The batch layer read the
+complete day, so it recovered them. \ReconText{}
+
+\input{sections/gen_recon_table}
+
+\subsection{Orchestration and pipeline health}
+Figure~\ref{fig:dag} in Section~\ref{sec:batch} shows the Airflow runs, and Figure~\ref{fig:health} shows the pipeline
+health dashboard. \HealthText{}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/grafana_pipeline.png}
+\caption{Grafana dashboard ``Pipeline health'' during the failure drill (top rows and alert tables). The gap
+from 16:51 to 16:54 in the charts (Sri Lanka time) is the drill. The table on the right lists the alert
+notifications that reached the API, with times in UTC. Lower rows (latency, lag, Airflow tasks and the run
+audit trail) are not shown.}
+\label{fig:health}
+\end{figure}
+
+\subsection{Performance on one laptop}
+Table~\ref{tab:perf} shows speed and resource use measured during the run.
+
+\input{sections/gen_perf_table}
+
+\subsection{Testing}
+The project has 39 automated tests (\code{pytest}), which run in their own Docker image. They cover the
+simulated clock, the zone lookup, the fleet model, the cost file and its manifest, the idle-streak logic,
+every validation rule, the zone metrics and profit rules in Spark, and a full batch-layer run on a small
+synthetic day with known answers. One test checks that the Spark profit rules give the same answer as the
+Python rules, which protects the two Lambda code paths from drifting apart. All 39 tests pass.
